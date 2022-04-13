@@ -9,12 +9,12 @@
 	"resources": {
 		"credentialDocumentation": [
 			{
-				"url": "https://docs.n8n.io/credentials/cortex"
+				"url": "https://docs.n8n.io"
 			}
 		],
 		"primaryDocumentation": [
 			{
-				"url": "https://docs.n8n.io/nodes/n8n-nodes-base.cortex/"
+				"url": "https://docs.n8n.io/"
 			}
 		]
 	}

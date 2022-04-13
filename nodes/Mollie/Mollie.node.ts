@@ -30,15 +30,14 @@ export class Mollie implements INodeType {
     ],
 
     properties: [
-
-       // ----------------------------------
+      // ----------------------------------
       //         API Key to choose
       // ----------------------------------
 
       {
-        displayName: 'Live Api Key',
-        name: 'isLiveKey',
-        type: 'boolean',
+        displayName: "Live Api Key",
+        name: "isLiveKey",
+        type: "boolean",
         default: true,
         required: true,
       },
@@ -269,20 +268,32 @@ export class Mollie implements INodeType {
         (body.webhookUrl = this.getNodeParameter(
           "updateWebhookUrl",
           0
-        ) as string),
-        (body.metadata = {
+        ) as string);
+      let updateOrder_id = this.getNodeParameter("updateOrder_id", 0) as string;
+      if (updateOrder_id != "") {
+        body.metadata = {
           order_id: this.getNodeParameter("updateOrder_id", 0) as string,
-        });
+        };
+      }
     }
-    responseData = await mollieApiRequest.call(this, method, body, resource, isLiveKey);
-    responseData = JSON.parse(responseData);
+
+    try {
+      responseData = await mollieApiRequest.call(
+        this,
+        method,
+        body,
+        resource,
+        isLiveKey
+      );
+      responseData = JSON.parse(responseData);
+    } catch (error) {
+      returnData.push(error as IDataObject);
+    }
 
     if (Array.isArray(responseData)) {
-      console.log("is Array")
       returnData.push.apply(returnData, responseData as IDataObject[]);
     } else {
-      console.log("is not Array")
-      returnData.push(responseData  as IDataObject);
+      returnData.push(responseData as IDataObject);
     }
 
     return [this.helpers.returnJsonArray(returnData)];

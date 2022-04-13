@@ -27,9 +27,6 @@ export async function mollieApiRequest(
     uri: `https://api.mollie.com/v2/payments${resource}`,
   };
   const credentials = await this.getCredentials("mollieApi");
-  console.log("generic functions")
-  console.log(isLiveKey)
-  console.log(credentials)
   if (isLiveKey && credentials != undefined && credentials.mollieApiKey) {
     options.headers!["Authorization"] = "Bearer " + credentials.mollieApiKey;
   }
