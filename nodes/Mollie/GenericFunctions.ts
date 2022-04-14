@@ -15,7 +15,7 @@ export async function mollieApiRequest(
     | ILoadOptionsFunctions,
     method: string,
     body: any = {},
-    resource: string,
+    uri: string,
     isLiveKey: boolean
 ): Promise<any> {
   const options: OptionsWithUri = {
@@ -24,7 +24,7 @@ export async function mollieApiRequest(
     },
     body,
     method,
-    uri: `https://api.mollie.com/v2/payments${resource}`,
+    uri: `https://api.mollie.com/v2${uri}`,
   };
   const credentials = await this.getCredentials("mollieApi");
   if (isLiveKey && credentials != undefined && credentials.mollieApiKey) {

@@ -42,12 +42,38 @@ export class Mollie implements INodeType {
         required: true,
       },
       // ----------------------------------
-      //         operations
+      //         Resource
+      // ----------------------------------
+
+      {
+        displayName: "Resource",
+        name: "resource",
+        type: "options",
+        options: [
+          {
+            name: "Payments",
+            value: "payments",
+          },
+          {
+            name: "Payment links",
+            value: "paymentLinks",
+          },
+        ],
+        default: "payments",
+        required: true,
+      },
+      // ----------------------------------
+      //        Payment operations
       // ----------------------------------
       {
         displayName: "Operation",
         name: "operation",
         type: "options",
+        displayOptions: {
+          show: {
+            resource: ["payments"],
+          },
+        },
         options: [
           {
             name: "Create",
@@ -73,6 +99,43 @@ export class Mollie implements INodeType {
             name: "Update",
             value: "update",
             description: "Update an entry",
+            displayOptions: {
+              show: {
+                resource: ["payments"],
+              },
+            },
+          },
+        ],
+        default: "getAll",
+        description: "The operation to perform.",
+      },
+      // ----------------------------------
+      //        Payment links operations
+      // ----------------------------------
+      {
+        displayName: "Operation",
+        name: "operation",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["paymentLinks"],
+          },
+        },
+        options: [
+          {
+            name: "Create",
+            value: "create",
+            description: "Create an entry",
+          },
+          {
+            name: "Get",
+            value: "get",
+            description: "Get data of an entry",
+          },
+          {
+            name: "Get All",
+            value: "getAll",
+            description: "Get data of all entries",
           },
         ],
         default: "getAll",
@@ -150,6 +213,7 @@ export class Mollie implements INodeType {
         displayOptions: {
           show: {
             operation: ["create"],
+            resource: ["payments"],
           },
         },
         required: true,
@@ -159,7 +223,7 @@ export class Mollie implements INodeType {
       /*                     operations:get,delete,update                           */
       /* -------------------------------------------------------------------------- */
       {
-        displayName: "Payment’s ID",
+        displayName: "ID",
         name: "paymentID",
         type: "string",
         default: "",
@@ -226,37 +290,60 @@ export class Mollie implements INodeType {
   };
 
   async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
+    const paymentUri = "/payments";
+    const paymentLinksUri = "/payment-links";
+
     let responseData;
     let body: any = {};
     let method = "";
-    let resource = "";
+    let uri = "";
     const returnData: IDataObject[] = [];
 
     const isLiveKey = this.getNodeParameter("isLiveKey", 0) as boolean;
     const operation = this.getNodeParameter("operation", 0) as string;
+    const resource = this.getNodeParameter("resource", 0) as string;
+
     if (operation === "create") {
       method = "POST";
+      if (resource === "payments") {
+        uri = paymentUri;
+        body.metadata = {
+          order_id: this.getNodeParameter("order_id", 0) as string,
+        };
+      } else if (resource === "paymentLinks") {
+        uri = paymentLinksUri;
+      }
       body.amount = {
         currency: this.getNodeParameter("currency", 0) as string,
         value: this.getNodeParameter("value", 0) as string,
       };
       (body.description = this.getNodeParameter("description", 0) as string),
         (body.redirectUrl = this.getNodeParameter("redirectUrl", 0) as string),
-        (body.webhookUrl = this.getNodeParameter("webhookUrl", 0) as string),
-        (body.metadata = {
-          order_id: this.getNodeParameter("order_id", 0) as string,
-        });
+        (body.webhookUrl = this.getNodeParameter("webhookUrl", 0) as string);
     } else if (operation === "get") {
       method = "GET";
-      resource = ("/" + this.getNodeParameter("paymentID", 0)) as string;
+      if (resource === "payments") {
+        uri = (paymentUri +
+          "/" +
+          this.getNodeParameter("paymentID", 0)) as string;
+      } else if (resource === "paymentLinks") {
+        uri = (paymentLinksUri +
+          "/" +
+          this.getNodeParameter("paymentID", 0)) as string;
+      }
     } else if (operation === "getAll") {
       method = "GET";
+      if (resource === "payments") {
+        uri = "/payments";
+      } else if (resource === "paymentLinks") {
+        uri = "/payment-links";
+      }
     } else if (operation === "delete") {
       method = "DELETE";
-      resource = ("/" + this.getNodeParameter("paymentID", 0)) as string;
+      uri = ("/payments/" + this.getNodeParameter("paymentID", 0)) as string;
     } else if (operation === "update") {
       method = "PATCH";
-      resource = ("/" + this.getNodeParameter("paymentID", 0)) as string;
+      uri = ("/payments/" + this.getNodeParameter("paymentID", 0)) as string;
       body.description = this.getNodeParameter(
         "updateDescription",
         0
@@ -282,7 +369,7 @@ export class Mollie implements INodeType {
         this,
         method,
         body,
-        resource,
+        uri,
         isLiveKey
       );
       responseData = JSON.parse(responseData);
