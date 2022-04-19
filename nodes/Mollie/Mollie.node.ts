@@ -286,6 +286,22 @@ export class Mollie implements INodeType {
         },
         required: false,
       },
+
+      /* -------------------------------------------------------------------------- */
+      /*                     operations:getAll                      */
+      /* -------------------------------------------------------------------------- */
+      {
+        displayName: "Limit",
+        name: "limit",
+        type: "number",
+        default: 250,
+        displayOptions: {
+          show: {
+            operation: ["getAll"],
+          },
+        },
+        required: false,
+      },
     ],
   };
 
@@ -332,11 +348,13 @@ export class Mollie implements INodeType {
           this.getNodeParameter("paymentID", 0)) as string;
       }
     } else if (operation === "getAll") {
+      const limit = this.getNodeParameter("limit", 0) as string;
+
       method = "GET";
       if (resource === "payments") {
-        uri = "/payments";
+        uri = "/payments" + "?limit=" + limit;
       } else if (resource === "paymentLinks") {
-        uri = "/payment-links";
+        uri = "/payment-links" + "?limit=" + limit;
       }
     } else if (operation === "delete") {
       method = "DELETE";
@@ -373,6 +391,14 @@ export class Mollie implements INodeType {
         isLiveKey
       );
       responseData = JSON.parse(responseData);
+      if (operation === "getAll") {
+        console.log(responseData);
+        if (resource === "payments") {
+          responseData = responseData["_embedded"]["payments"];
+        } else if (resource === "paymentLinks") {
+          responseData = responseData["_embedded"]["payment_links"];
+        }
+      }
     } catch (error) {
       returnData.push(error as IDataObject);
     }
