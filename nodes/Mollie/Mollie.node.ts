@@ -189,6 +189,20 @@ export class Mollie implements INodeType {
         displayOptions: {
           show: {
             operation: ["create"],
+            resource: ["paymentLinks"],          
+          },
+        },
+        required: false,
+      },
+      {
+        displayName: "Redirect Url",
+        name: "redirectUrl",
+        type: "string",
+        default: "",
+        displayOptions: {
+          show: {
+            operation: ["create"],
+            resource: ["payments"],          
           },
         },
         required: true,
@@ -203,7 +217,7 @@ export class Mollie implements INodeType {
             operation: ["create"],
           },
         },
-        required: true,
+        required: false,
       },
       {
         displayName: "Order Id",
@@ -422,12 +436,8 @@ export class Mollie implements INodeType {
           returnData.push(responseData as IDataObject);
         }
       } catch (error) {
-				if (this.continueOnFail()) {
-					returnData.push({ error: error });
-					continue;
-				}
-				throw error;
-			}
+        returnData.push(error as IDataObject);
+      }
     }
 
     return [this.helpers.returnJsonArray(returnData)];
