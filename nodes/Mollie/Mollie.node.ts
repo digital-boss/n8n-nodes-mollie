@@ -1,4 +1,4 @@
-import { IExecuteFunctions } from "n8n-core"
+import { IExecuteFunctions } from "n8n-core";
 import {
     INodeExecutionData,
     INodeType,
@@ -6,9 +6,9 @@ import {
     IDataObject,
     IWebhookFunctions,
     IWebhookResponseData,
-} from "n8n-workflow"
+} from "n8n-workflow";
 
-import { mollieApiRequest } from "./GenericFunctions"
+import { mollieApiRequest } from "./GenericFunctions";
 
 export class Mollie implements INodeType {
     description: INodeTypeDescription = {
@@ -314,116 +314,116 @@ export class Mollie implements INodeType {
                 required: false,
             },
         ],
-    }
+    };
 
     async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
-        const { data } = this.getBodyData()
+        const { data } = this.getBodyData();
 
         return {
             workflowData: [this.helpers.returnJsonArray(data)],
-        }
+        };
     }
 
     async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
-        const paymentUri = "/payments"
-        const paymentLinksUri = "/payment-links"
+        const paymentUri = "/payments";
+        const paymentLinksUri = "/payment-links";
 
-        let responseData
-        let body: any = {}
-        let method = ""
-        let uri = ""
-        const returnData: IDataObject[] = []
+        let responseData;
+        const body: any = {};
+        let method = "";
+        let uri = "";
+        const returnData: IDataObject[] = [];
 
-        const isLiveKey = this.getNodeParameter("isLiveKey", 0) as boolean
-        const resource = this.getNodeParameter("resource", 0) as string
+        const isLiveKey = this.getNodeParameter("isLiveKey", 0) as boolean;
+        const resource = this.getNodeParameter("resource", 0) as string;
 
-        const [data] = this.getInputData().map((row) => row.json)
+        const [data] = this.getInputData().map((row) => row.json);
 
-        const { operation } = data
+        const { operation } = data;
 
         switch (operation) {
             case "create":
-                method = "POST"
+                method = "POST";
                 if (resource === "payments") {
-                    uri = paymentUri
+                    uri = paymentUri;
                     body.metadata = {
                         order_id: data.order_id as string,
-                    }
+                    };
                 } else if (resource === "paymentLinks") {
-                    uri = paymentLinksUri
+                    uri = paymentLinksUri;
                 }
                 body.amount = {
                     currency: data.currency as string,
                     value: data.value as string,
-                }
-                ;(body.description = data.description as string),
+                };
+                (body.description = data.description as string),
                     (body.redirectUrl = data.redirectUrl as string),
-                    (body.webhookUrl = data.webhookUrl as string)
-                break
+                    (body.webhookUrl = data.webhookUrl as string);
+                break;
 
             case "get":
-                method = "GET"
+                method = "GET";
                 if (resource === "payments") {
-                    uri = (paymentUri + "/" + data.paymentID) as string
+                    uri = (paymentUri + "/" + data.paymentID) as string;
                 } else if (resource === "paymentLinks") {
-                    uri = (paymentLinksUri + "/" + data.paymentID) as string
+                    uri = (paymentLinksUri + "/" + data.paymentID) as string;
                 }
-                break
+                break;
 
             case "getAll":
-                const limit = data.limit as string
+                const limit = data.limit as string;
 
-                method = "GET"
+                method = "GET";
                 if (resource === "payments") {
-                    uri = "/payments" + "?limit=" + limit
+                    uri = "/payments" + "?limit=" + limit;
                 } else if (resource === "paymentLinks") {
-                    uri = "/payment-links" + "?limit=" + limit
+                    uri = "/payment-links" + "?limit=" + limit;
                 }
-                break
+                break;
 
             case "delete":
-                method = "DELETE"
-                uri = ("/payments/" + data.paymentID) as string
-                break
+                method = "DELETE";
+                uri = ("/payments/" + data.paymentID) as string;
+                break;
 
             case "update":
-                method = "PATCH"
-                uri = ("/payments/" + data.paymentID) as string
-                body.description = data.updateDescription as string
-                ;(body.redirectUrl = data.updateRedirectUrl as string),
-                    (body.webhookUrl = data.updateWebhookUrl as string)
-                let updateOrder_id = data.updateOrder_id as string
+                method = "PATCH";
+                uri = ("/payments/" + data.paymentID) as string;
+                body.description = data.updateDescription as string;
+                (body.redirectUrl = data.updateRedirectUrl as string),
+                    (body.webhookUrl = data.updateWebhookUrl as string);
+                const updateOrder_id = data.updateOrder_id as string;
                 if (updateOrder_id != "") {
                     body.metadata = {
                         order_id: data.updateOrder_id as string,
-                    }
+                    };
                 }
-                break
+                break;
 
             default:
-                return [this.helpers.returnJsonArray([])]
+                return [this.helpers.returnJsonArray([])];
         }
 
         try {
-            responseData = await mollieApiRequest.call(this, method, body, uri, isLiveKey)
-            responseData = JSON.parse(responseData)
+            responseData = await mollieApiRequest.call(this, method, body, uri, isLiveKey);
+            responseData = JSON.parse(responseData);
             if (operation === "getAll") {
                 if (resource === "payments") {
-                    responseData = responseData["_embedded"]["payments"]
+                    responseData = responseData["_embedded"]["payments"];
                 } else if (resource === "paymentLinks") {
-                    responseData = responseData["_embedded"]["payment_links"]
+                    responseData = responseData["_embedded"]["payment_links"];
                 }
             }
         } catch (error) {
-            returnData.push(error as IDataObject)
+            returnData.push(error as IDataObject);
         }
 
         if (Array.isArray(responseData)) {
-            returnData.push.apply(returnData, responseData as IDataObject[])
+            returnData.push.apply(returnData, responseData as IDataObject[]);
         } else {
-            returnData.push(responseData as IDataObject)
+            returnData.push(responseData as IDataObject);
         }
 
-        return [this.helpers.returnJsonArray(returnData)]
+        return [this.helpers.returnJsonArray(returnData)];
     }
 }
