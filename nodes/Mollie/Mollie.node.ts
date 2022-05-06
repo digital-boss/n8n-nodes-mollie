@@ -308,6 +308,7 @@ export class Mollie implements INodeType {
   async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
     const paymentUri = "/payments";
     const paymentLinksUri = "/payment-links";
+    const items = this.getInputData();
 
     let responseData;
     let body: any = {};
@@ -319,94 +320,114 @@ export class Mollie implements INodeType {
     const operation = this.getNodeParameter("operation", 0) as string;
     const resource = this.getNodeParameter("resource", 0) as string;
 
-    if (operation === "create") {
-      method = "POST";
-      if (resource === "payments") {
-        uri = paymentUri;
-        body.metadata = {
-          order_id: this.getNodeParameter("order_id", 0) as string,
-        };
-      } else if (resource === "paymentLinks") {
-        uri = paymentLinksUri;
-      }
-      body.amount = {
-        currency: this.getNodeParameter("currency", 0) as string,
-        value: this.getNodeParameter("value", 0) as string,
-      };
-      (body.description = this.getNodeParameter("description", 0) as string),
-        (body.redirectUrl = this.getNodeParameter("redirectUrl", 0) as string),
-        (body.webhookUrl = this.getNodeParameter("webhookUrl", 0) as string);
-    } else if (operation === "get") {
-      method = "GET";
-      if (resource === "payments") {
-        uri = (paymentUri +
-          "/" +
-          this.getNodeParameter("paymentID", 0)) as string;
-      } else if (resource === "paymentLinks") {
-        uri = (paymentLinksUri +
-          "/" +
-          this.getNodeParameter("paymentID", 0)) as string;
-      }
-    } else if (operation === "getAll") {
-      const limit = this.getNodeParameter("limit", 0) as string;
+    for (let i = 0; i < items.length; i++) {
+      try {
+        if (operation === "create") {
+          method = "POST";
+          if (resource === "payments") {
+            uri = paymentUri;
+            body.metadata = {
+              order_id: this.getNodeParameter("order_id", 0) as string,
+            };
+          } else if (resource === "paymentLinks") {
+            uri = paymentLinksUri;
+          }
+          body.amount = {
+            currency: this.getNodeParameter("currency", 0) as string,
+            value: this.getNodeParameter("value", 0) as string,
+          };
+          (body.description = this.getNodeParameter(
+            "description",
+            0
+          ) as string),
+            (body.redirectUrl = this.getNodeParameter(
+              "redirectUrl",
+              0
+            ) as string),
+            (body.webhookUrl = this.getNodeParameter(
+              "webhookUrl",
+              0
+            ) as string);
+        } else if (operation === "get") {
+          method = "GET";
+          if (resource === "payments") {
+            uri = (paymentUri +
+              "/" +
+              this.getNodeParameter("paymentID", 0)) as string;
+          } else if (resource === "paymentLinks") {
+            uri = (paymentLinksUri +
+              "/" +
+              this.getNodeParameter("paymentID", 0)) as string;
+          }
+        } else if (operation === "getAll") {
+          const limit = this.getNodeParameter("limit", 0) as string;
 
-      method = "GET";
-      if (resource === "payments") {
-        uri = "/payments" + "?limit=" + limit;
-      } else if (resource === "paymentLinks") {
-        uri = "/payment-links" + "?limit=" + limit;
-      }
-    } else if (operation === "delete") {
-      method = "DELETE";
-      uri = ("/payments/" + this.getNodeParameter("paymentID", 0)) as string;
-    } else if (operation === "update") {
-      method = "PATCH";
-      uri = ("/payments/" + this.getNodeParameter("paymentID", 0)) as string;
-      body.description = this.getNodeParameter(
-        "updateDescription",
-        0
-      ) as string;
-      (body.redirectUrl = this.getNodeParameter(
-        "updateRedirectUrl",
-        0
-      ) as string),
-        (body.webhookUrl = this.getNodeParameter(
-          "updateWebhookUrl",
-          0
-        ) as string);
-      let updateOrder_id = this.getNodeParameter("updateOrder_id", 0) as string;
-      if (updateOrder_id != "") {
-        body.metadata = {
-          order_id: this.getNodeParameter("updateOrder_id", 0) as string,
-        };
-      }
-    }
-
-    try {
-      responseData = await mollieApiRequest.call(
-        this,
-        method,
-        body,
-        uri,
-        isLiveKey
-      );
-      responseData = JSON.parse(responseData);
-      if (operation === "getAll") {
-        console.log(responseData);
-        if (resource === "payments") {
-          responseData = responseData["_embedded"]["payments"];
-        } else if (resource === "paymentLinks") {
-          responseData = responseData["_embedded"]["payment_links"];
+          method = "GET";
+          if (resource === "payments") {
+            uri = "/payments" + "?limit=" + limit;
+          } else if (resource === "paymentLinks") {
+            uri = "/payment-links" + "?limit=" + limit;
+          }
+        } else if (operation === "delete") {
+          method = "DELETE";
+          uri = ("/payments/" +
+            this.getNodeParameter("paymentID", 0)) as string;
+        } else if (operation === "update") {
+          method = "PATCH";
+          uri = ("/payments/" +
+            this.getNodeParameter("paymentID", 0)) as string;
+          body.description = this.getNodeParameter(
+            "updateDescription",
+            0
+          ) as string;
+          (body.redirectUrl = this.getNodeParameter(
+            "updateRedirectUrl",
+            0
+          ) as string),
+            (body.webhookUrl = this.getNodeParameter(
+              "updateWebhookUrl",
+              0
+            ) as string);
+          let updateOrder_id = this.getNodeParameter(
+            "updateOrder_id",
+            0
+          ) as string;
+          if (updateOrder_id != "") {
+            body.metadata = {
+              order_id: this.getNodeParameter("updateOrder_id", 0) as string,
+            };
+          }
         }
-      }
-    } catch (error) {
-      returnData.push(error as IDataObject);
-    }
 
-    if (Array.isArray(responseData)) {
-      returnData.push.apply(returnData, responseData as IDataObject[]);
-    } else {
-      returnData.push(responseData as IDataObject);
+        responseData = await mollieApiRequest.call(
+          this,
+          method,
+          body,
+          uri,
+          isLiveKey
+        );
+        responseData = JSON.parse(responseData);
+        if (operation === "getAll") {
+          console.log(responseData);
+          if (resource === "payments") {
+            responseData = responseData["_embedded"]["payments"];
+          } else if (resource === "paymentLinks") {
+            responseData = responseData["_embedded"]["payment_links"];
+          }
+        }
+
+        if (Array.isArray(responseData)) {
+          returnData.push.apply(returnData, responseData as IDataObject[]);
+        } else {
+          returnData.push(responseData as IDataObject);
+        }
+      } catch (error) {
+				if (this.continueOnFail()) {
+					returnData.push({ error: error });
+					continue;
+				}
+				throw error;
+			}
     }
 
     return [this.helpers.returnJsonArray(returnData)];
