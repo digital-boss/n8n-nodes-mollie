@@ -336,48 +336,50 @@ export class Mollie implements INodeType {
     const resource = this.getNodeParameter("resource", 0) as string;
 
     for (let i = 0; i < items.length; i++) {
+
+
       try {
         if (operation === "create") {
           method = "POST";
           if (resource === "payments") {
             uri = paymentUri;
             body.metadata = {
-              order_id: this.getNodeParameter("order_id", 0) as string,
+              order_id: this.getNodeParameter("order_id", i) as string,
             };
           } else if (resource === "paymentLinks") {
             uri = paymentLinksUri;
           }
-          let value = this.getNodeParameter("value", 0) as string
+          let value = this.getNodeParameter("value", i) as string
 
           body.amount = {
-            currency: this.getNodeParameter("currency", 0) as string,
+            currency: this.getNodeParameter("currency", i) as string,
             value: value.toString()
           };
           (body.description = this.getNodeParameter(
             "description",
-            0
+            i
           ) as string),
             (body.redirectUrl = this.getNodeParameter(
               "redirectUrl",
-              0
+              i
             ) as string),
             (body.webhookUrl = this.getNodeParameter(
               "webhookUrl",
-              0
+              i
             ) as string);
         } else if (operation === "get") {
           method = "GET";
           if (resource === "payments") {
             uri = (paymentUri +
               "/" +
-              this.getNodeParameter("paymentID", 0)) as string;
+              this.getNodeParameter("paymentID", i)) as string;
           } else if (resource === "paymentLinks") {
             uri = (paymentLinksUri +
               "/" +
-              this.getNodeParameter("paymentID", 0)) as string;
+              this.getNodeParameter("paymentID", i)) as string;
           }
         } else if (operation === "getAll") {
-          const limit = this.getNodeParameter("limit", 0) as string;
+          const limit = this.getNodeParameter("limit", i) as string;
 
           method = "GET";
           if (resource === "payments") {
@@ -388,30 +390,30 @@ export class Mollie implements INodeType {
         } else if (operation === "delete") {
           method = "DELETE";
           uri = ("/payments/" +
-            this.getNodeParameter("paymentID", 0)) as string;
+            this.getNodeParameter("paymentID", i)) as string;
         } else if (operation === "update") {
           method = "PATCH";
           uri = ("/payments/" +
-            this.getNodeParameter("paymentID", 0)) as string;
+            this.getNodeParameter("paymentID", i)) as string;
           body.description = this.getNodeParameter(
             "updateDescription",
-            0
+            i
           ) as string;
           (body.redirectUrl = this.getNodeParameter(
             "updateRedirectUrl",
-            0
+            i
           ) as string),
             (body.webhookUrl = this.getNodeParameter(
               "updateWebhookUrl",
-              0
+              i
             ) as string);
           let updateOrder_id = this.getNodeParameter(
             "updateOrder_id",
-            0
+            i
           ) as string;
           if (updateOrder_id != "") {
             body.metadata = {
-              order_id: this.getNodeParameter("updateOrder_id", 0) as string,
+              order_id: this.getNodeParameter("updateOrder_id", i) as string,
             };
           }
         }
