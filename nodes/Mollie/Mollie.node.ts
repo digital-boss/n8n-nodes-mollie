@@ -1,12 +1,7 @@
-import { IExecuteFunctions } from "n8n-core";
-import {
-  INodeExecutionData,
-  INodeType,
-  INodeTypeDescription,
-  IDataObject,
-} from "n8n-workflow";
+import {IExecuteFunctions} from "n8n-core";
+import {IDataObject, INodeExecutionData, INodeType, INodeTypeDescription,} from "n8n-workflow";
 
-import { mollieApiRequest } from "./GenericFunctions";
+import {mollieApiRequest} from "./GenericFunctions";
 
 export class Mollie implements INodeType {
   description: INodeTypeDescription = {
@@ -58,8 +53,12 @@ export class Mollie implements INodeType {
             name: "Payment links",
             value: "paymentLinks",
           },
+          {
+            name: "Methods",
+            value: "methods",
+          },
         ],
-        default: "payments",
+        default: "methods",
         required: true,
       },
       // ----------------------------------
@@ -304,7 +303,7 @@ export class Mollie implements INodeType {
       },
 
       /* -------------------------------------------------------------------------- */
-      /*                     operations:getAll                      */
+      /*                     operations:getAll                                      */
       /* -------------------------------------------------------------------------- */
       {
         displayName: "Limit",
@@ -318,12 +317,184 @@ export class Mollie implements INodeType {
         },
         required: false,
       },
+      // ----------------------------------
+      //        Method operations
+      // ----------------------------------
+      {
+        displayName: "Operation",
+        name: "operation",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["methods"],
+          },
+        },
+        options: [
+          {
+            name: "Get",
+            value: "get",
+            description: "Retrieve data of specific payments",
+          },
+          {
+            name: "List",
+            value: "list",
+            description: "Retrieve details of all payments related to a profile",
+          },
+          {
+            name: "List All",
+            value: "listAll",
+            description: "Retrieve all payments that mollie offers",
+          },
+        ],
+        default: "list",
+        description: "The operation to perform.",
+      },
+      /* -------------------------------------------------------------------------- */
+      /*                              operations:get                                */
+      /* -------------------------------------------------------------------------- */
+      {
+        displayName: "ID",
+        name: "methodID",
+        type: "string",
+        default: "",
+        displayOptions: {
+          show: {
+            operation: ["get"],
+          },
+        },
+        required: true,
+      },
+      {
+        displayName: "Locale",
+        name: "locale",
+        type: "string",
+        default: "",
+        displayOptions: {
+          show: {
+            operation: ["get"],
+          },
+        },
+        required: false,
+      },
+      {
+        displayName: "Currency",
+        name: "currency",
+        type: "string",
+        default: "",
+        displayOptions: {
+          show: {
+            operation: ["get"],
+          },
+        },
+        required: false,
+      },
+      /* -------------------------------------------------------------------------- */
+      /*                                operations:list,listAll                     */
+      /* -------------------------------------------------------------------------- */
+      {
+        displayName: "sequenceType",
+        name: "sequenceType",
+        type: "string",
+        default: "oneoff",
+        displayOptions: {
+          show: {
+            operation: ["list"],
+          },
+        },
+        required: false,
+      },
+      {
+        displayName: "Locale",
+        name: "locale",
+        type: "string",
+        default: "",
+        displayOptions: {
+          show: {
+            operation: ["list", "listAll"],
+          },
+        },
+        required: false,
+      },
+      {
+        displayName: "Currency",
+        name: "currency",
+        type: "string",
+        default: "",
+        displayOptions: {
+          show: {
+            operation: ["list", "listAll"],
+          },
+        },
+        required: false,
+      },
+      {
+        displayName: "Value",
+        name: "value",
+        type: "string",
+        description: "Make sure to send 2 decimals and omit the thousands separator, e.g. 'currency':'EUR', 'value':'1000.00' if you would want to charge €1000.00.",
+        default: "",
+        displayOptions: {
+          show: {
+            operation: ["list", "listAll"],
+          },
+        },
+        required: false,
+      },
+      {
+        displayName: "Resource",
+        name: "resource",
+        type: "string",
+        default: "",
+        displayOptions: {
+          show: {
+            operation: ["list"],
+          },
+        },
+        required: false,
+      },
+      {
+        displayName: "Billing Country",
+        name: "billingCountry",
+        type: "string",
+        default: "",
+        displayOptions: {
+          show: {
+            operation: ["list"],
+          },
+        },
+        required: false,
+      },
+      {
+        displayName: "Wallet",
+        name: "includeWallets",
+        type: "string",
+        default: "",
+        displayOptions: {
+          show: {
+            operation: ["list"],
+          },
+        },
+        required: false,
+      },
+      {
+        displayName: "Categories",
+        name: "orderLineCategories",
+        type: "string",
+        default: "",
+        displayOptions: {
+          show: {
+            operation: ["list"],
+          },
+        },
+        required: false,
+      },
     ],
   };
 
   async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
     const paymentUri = "/payments";
     const paymentLinksUri = "/payment-links";
+    const methodLinkUri = "/methods";
     const items = this.getInputData();
 
     let responseData;
@@ -346,7 +517,7 @@ export class Mollie implements INodeType {
           } else if (resource === "paymentLinks") {
             uri = paymentLinksUri;
           }
-          let value = this.getNodeParameter("value", i) as string;
+          const value = this.getNodeParameter("value", i) as string;
 
           body.amount = {
             currency: this.getNodeParameter("currency", i) as string,
@@ -355,15 +526,15 @@ export class Mollie implements INodeType {
           (body.description = this.getNodeParameter(
             "description",
             i
-          ) as string),
-            (body.redirectUrl = this.getNodeParameter(
-              "redirectUrl",
-              i
-            ) as string),
-            (body.webhookUrl = this.getNodeParameter(
-              "webhookUrl",
-              i
-            ) as string);
+          ) as string);
+          (body.redirectUrl = this.getNodeParameter(
+            "redirectUrl",
+            i
+          ) as string);
+          (body.webhookUrl = this.getNodeParameter(
+            "webhookUrl",
+            i
+          ) as string);
         } else if (operation === "get") {
           method = "GET";
           if (resource === "payments") {
@@ -374,10 +545,60 @@ export class Mollie implements INodeType {
             uri = (paymentLinksUri +
               "/" +
               this.getNodeParameter("paymentID", i)) as string;
+          } else if (resource === "methods") {
+            uri = (methodLinkUri +
+              "/" +
+              this.getNodeParameter("methodID", i)) as string;
           }
+        } else if (operation === "list") {
+          method = "GET";
+          uri = methodLinkUri;
+          const value = this.getNodeParameter("value", i) as string;
+
+          body.amount = {
+            currency: this.getNodeParameter("currency", i) as string,
+            value: value.toString(),
+          };
+          body.sequenceType = this.getNodeParameter(
+            "sequenceType",
+            i
+          ) as string;
+          (body.locale = this.getNodeParameter(
+            "locale",
+            i
+          ) as string);
+          body.resource = this.getNodeParameter(
+            "resource",
+            i
+          ) as string;
+          (body.billingCountry = this.getNodeParameter(
+            "billingCountry",
+            i
+          ) as string);
+          (body.includeWallets = this.getNodeParameter(
+            "includeWallets",
+            i
+          ) as string);
+          (body.orderLineCategories = this.getNodeParameter(
+            "orderLineCategories",
+            i
+          ) as string);
+
+        } else if (operation === "listAll") {
+          method = "GET";
+          uri = methodLinkUri + "/all";
+          const value = this.getNodeParameter("value", i) as string;
+
+          body.amount = {
+            currency: this.getNodeParameter("currency", i) as string,
+            value: value.toString(),
+          };
+          body.locale = this.getNodeParameter(
+            "locale",
+            i
+          ) as string;
         } else if (operation === "getAll") {
           const limit = this.getNodeParameter("limit", i) as string;
-
           method = "GET";
           if (resource === "payments") {
             uri = "/payments" + "?limit=" + limit;
@@ -399,18 +620,18 @@ export class Mollie implements INodeType {
           (body.redirectUrl = this.getNodeParameter(
             "updateRedirectUrl",
             i
-          ) as string),
-            (body.webhookUrl = this.getNodeParameter(
-              "updateWebhookUrl",
-              i
-            ) as string);
-          let updateOrder_id = this.getNodeParameter(
-            "updateOrder_id",
+          ) as string);
+          (body.webhookUrl = this.getNodeParameter(
+            "updateWebhookUrl",
+            i
+          ) as string);
+          const updateOrderId = this.getNodeParameter(
+            "updateOrderId",
             i
           ) as string;
-          if (updateOrder_id != "") {
+          if (updateOrderId !== "") {
             body.metadata = {
-              order_id: this.getNodeParameter("updateOrder_id", i) as string,
+              order_id: this.getNodeParameter("updateOrderId", i) as string,
             };
           }
         }
@@ -423,12 +644,14 @@ export class Mollie implements INodeType {
           isLiveKey
         );
         responseData = JSON.parse(responseData);
-        if (operation === "getAll") {
+        if (operation === "getAll" || operation === "ListAll" || operation === "list") {
           console.log(responseData);
           if (resource === "payments") {
             responseData = responseData["_embedded"]["payments"];
           } else if (resource === "paymentLinks") {
             responseData = responseData["_embedded"]["payment_links"];
+          } else if (resource === "methods") {
+            responseData = responseData["_embedded"]["methods"];
           }
         }
 

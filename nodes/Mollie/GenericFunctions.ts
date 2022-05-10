@@ -27,10 +27,10 @@ export async function mollieApiRequest(
     uri: `https://api.mollie.com/v2${uri}`,
   };
   const credentials = await this.getCredentials("mollieApi");
-  if (isLiveKey && credentials != undefined && credentials.mollieApiKey) {
+  if (isLiveKey && credentials !== undefined && credentials.mollieApiKey) {
     options.headers!["Authorization"] = "Bearer " + credentials.mollieApiKey;
   }
-  else if(!isLiveKey && credentials != undefined && credentials.mollieTestApiKey){
+  else if(!isLiveKey && credentials !== undefined && credentials.mollieTestApiKey){
     options.headers!["Authorization"] = "Bearer " + credentials.mollieTestApiKey;
   }
   return await this.helpers.request!(options);
