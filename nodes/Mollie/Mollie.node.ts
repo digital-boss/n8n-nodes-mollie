@@ -161,7 +161,8 @@ export class Mollie implements INodeType {
         displayName: "Value",
         name: "value",
         type: "string",
-        description: "Make sure to send 2 decimals and omit the thousands separator, e.g. 'currency':'EUR', 'value':'1000.00' if you would want to charge €1000.00.",
+        description:
+          "Make sure to send 2 decimals and omit the thousands separator, e.g. 'currency':'EUR', 'value':'1000.00' if you would want to charge €1000.00.",
         default: "",
         displayOptions: {
           show: {
@@ -190,7 +191,7 @@ export class Mollie implements INodeType {
         displayOptions: {
           show: {
             operation: ["create"],
-            resource: ["paymentLinks"],          
+            resource: ["paymentLinks"],
           },
         },
         required: false,
@@ -203,7 +204,7 @@ export class Mollie implements INodeType {
         displayOptions: {
           show: {
             operation: ["create"],
-            resource: ["payments"],          
+            resource: ["payments"],
           },
         },
         required: false,
@@ -330,14 +331,10 @@ export class Mollie implements INodeType {
     let method = "";
     let uri = "";
     const returnData: IDataObject[] = [];
-
-    const isLiveKey = this.getNodeParameter("isLiveKey", 0) as boolean;
-    const operation = this.getNodeParameter("operation", 0) as string;
-    const resource = this.getNodeParameter("resource", 0) as string;
-
     for (let i = 0; i < items.length; i++) {
-
-
+      const isLiveKey = this.getNodeParameter("isLiveKey", i) as boolean;
+      const operation = this.getNodeParameter("operation", i) as string;
+      const resource = this.getNodeParameter("resource", i) as string;
       try {
         if (operation === "create") {
           method = "POST";
@@ -349,11 +346,11 @@ export class Mollie implements INodeType {
           } else if (resource === "paymentLinks") {
             uri = paymentLinksUri;
           }
-          let value = this.getNodeParameter("value", i) as string
+          let value = this.getNodeParameter("value", i) as string;
 
           body.amount = {
             currency: this.getNodeParameter("currency", i) as string,
-            value: value.toString()
+            value: value.toString(),
           };
           (body.description = this.getNodeParameter(
             "description",
