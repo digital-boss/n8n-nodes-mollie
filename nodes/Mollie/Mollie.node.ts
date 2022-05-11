@@ -369,12 +369,11 @@ export class Mollie implements INodeType {
     let method = "";
     let uri = "";
     const returnData: IDataObject[] = [];
-
-    const isLiveKey = this.getNodeParameter("isLiveKey", 0) as boolean;
-    const operation = this.getNodeParameter("operation", 0) as string;
-    const resource = this.getNodeParameter("resource", 0) as string;
-
     for (let i = 0; i < items.length; i++) {
+      const isLiveKey = this.getNodeParameter("isLiveKey", i) as boolean;
+      const operation = this.getNodeParameter("operation", i) as string;
+      const resource = this.getNodeParameter("resource", i) as string;
+
       try {
         switch (operation) {
           case "create":
@@ -382,18 +381,18 @@ export class Mollie implements INodeType {
             if (resource === "payments") {
               uri = paymentUri;
               body.metadata = {
-                order_id: this.getNodeParameter("order_id", 0) as string,
+                order_id: this.getNodeParameter("order_id", i) as string,
               };
             } else if (resource === "paymentLinks") {
               uri = paymentLinksUri;
             }
             body.amount = {
-              currency: this.getNodeParameter("currency", 0) as string,
-              value: this.getNodeParameter("value", 0)?.toString() as string,
+              currency: this.getNodeParameter("currency", i) as string,
+              value: this.getNodeParameter("value", i)?.toString() as string,
             };
-            (body.description = this.getNodeParameter("description", 0) as string),
-              (body.redirectUrl = this.getNodeParameter("redirectUrl", 0) as string),
-              (body.webhookUrl = this.getNodeParameter("webhookUrl", 0) as string);
+            (body.description = this.getNodeParameter("description", i) as string),
+              (body.redirectUrl = this.getNodeParameter("redirectUrl", i) as string),
+              (body.webhookUrl = this.getNodeParameter("webhookUrl", i) as string);
             break;
 
           case "list":
@@ -409,18 +408,18 @@ export class Mollie implements INodeType {
           case "get":
             method = "GET";
             if (resource === "payments") {
-              uri = (paymentUri + "/" + this.getNodeParameter("paymentID", 0)) as string;
+              uri = (paymentUri + "/" + this.getNodeParameter("paymentID", i)) as string;
             } else if (resource === "paymentLinks") {
               uri = (paymentLinksUri +
                 "/" +
-                this.getNodeParameter("paymentID", 0)) as string;
+                this.getNodeParameter("paymentID", i)) as string;
             } else if (resource === "methods") {
-              uri = (methodsUri + "/" + this.getNodeParameter("paymentID", 0)) as string;
+              uri = (methodsUri + "/" + this.getNodeParameter("paymentID", i)) as string;
             }
             break;
 
           case "getAll":
-            const limit = this.getNodeParameter("limit", 0) as string;
+            const limit = this.getNodeParameter("limit", i) as string;
 
             method = "GET";
             if (resource === "payments") {
@@ -432,19 +431,19 @@ export class Mollie implements INodeType {
 
           case "delete":
             method = "DELETE";
-            uri = ("/payments/" + this.getNodeParameter("paymentID", 0)) as string;
+            uri = ("/payments/" + this.getNodeParameter("paymentID", i)) as string;
             break;
 
           case "update":
             method = "PATCH";
-            uri = ("/payments/" + this.getNodeParameter("paymentID", 0)) as string;
-            body.description = this.getNodeParameter("updateDescription", 0) as string;
-            (body.redirectUrl = this.getNodeParameter("updateRedirectUrl", 0) as string),
-              (body.webhookUrl = this.getNodeParameter("updateWebhookUrl", 0) as string);
-            let updateOrder_id = this.getNodeParameter("updateOrder_id", 0) as string;
+            uri = ("/payments/" + this.getNodeParameter("paymentID", i)) as string;
+            body.description = this.getNodeParameter("updateDescription", i) as string;
+            (body.redirectUrl = this.getNodeParameter("updateRedirectUrl", i) as string),
+              (body.webhookUrl = this.getNodeParameter("updateWebhookUrl", i) as string);
+            let updateOrder_id = this.getNodeParameter("updateOrder_id", i) as string;
             if (updateOrder_id != "") {
               body.metadata = {
-                order_id: this.getNodeParameter("updateOrder_id", 0) as string,
+                order_id: this.getNodeParameter("updateOrder_id", i) as string,
               };
             }
             break;
