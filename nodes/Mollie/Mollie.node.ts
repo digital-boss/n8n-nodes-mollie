@@ -1,487 +1,210 @@
-import { IExecuteFunctions } from "n8n-core";
 import {
-  INodeExecutionData,
-  INodeType,
-  INodeTypeDescription,
-  IDataObject,
-} from "n8n-workflow";
+	IExecuteFunctions
+} from 'n8n-core';
 
-import { mollieApiRequest } from "./GenericFunctions";
+import {
+	IDataObject,
+	INodeExecutionData,
+	INodeType,
+	INodeTypeDescription,
+} from 'n8n-workflow';
+
+import {
+	mollieApiRequest
+} from './GenericFunctions';
+import {
+	methodsFields,
+	methodsOperations,
+	paymentLinksFields,
+	paymentLinksOperations,
+	paymentsFields,
+	paymentsOperations,
+} from './descriptions';
 
 export class Mollie implements INodeType {
-  description: INodeTypeDescription = {
-    displayName: "Mollie",
-    name: "mollie",
-    icon: "file:mollie.png",
-    group: ["transform"],
-    version: 1,
-    description: "Mollie REST API",
-    defaults: {
-      name: "Mollie",
-      color: "#772244",
-    },
-    inputs: ["main"],
-    outputs: ["main"],
-    credentials: [
-      {
-        name: "mollieApi",
-        required: true,
-      },
-    ],
+	description: INodeTypeDescription = {
+		displayName: 'Mollie',
+		name: 'mollie',
+		icon: 'file:mollie.png',
+		group: ['transform'],
+		version: 1,
+		description: 'Mollie REST API',
+		defaults: {
+			name: 'Mollie',
+			color: '#772244',
+		},
+		inputs: ['main'],
+		outputs: ['main'],
+		credentials: [
+			{
+				name: 'mollieApi',
+				required: true,
+			},
+		],
 
-    properties: [
-      // ----------------------------------
-      //         API Key to choose
-      // ----------------------------------
+		properties: [
+			{
+				displayName: 'Live Api Key',
+				name: 'isLiveKey',
+				required: true,
+				type: 'boolean',
+				default: true,
+			},
+			{
+				displayName: 'Resource',
+				name: 'resource',
+				required: true,
+				type: 'options',
+				options: [
+					{
+						name: 'Payments',
+						value: 'payments',
+					},
+					{
+						name: 'Payment links',
+						value: 'paymentLinks',
+					},
+					{
+						name: 'Methods',
+						value: 'methods',
+					},
+				],
+				default: 'payments',
+			},
+			...paymentsOperations,
+			...paymentsFields,
+			...paymentLinksOperations,
+			...paymentLinksFields,
+			...methodsOperations,
+			...methodsFields,
+		],
 
-      {
-        displayName: "Live Api Key",
-        name: "isLiveKey",
-        type: "boolean",
-        default: true,
-        required: true,
-      },
-      // ----------------------------------
-      //         Resource
-      // ----------------------------------
+	};
 
-      {
-        displayName: "Resource",
-        name: "resource",
-        type: "options",
-        options: [
-          {
-            name: "Payments",
-            value: "payments",
-          },
-          {
-            name: "Payment links",
-            value: "paymentLinks",
-          },
-          {
-            name: "Methods",
-            value: "methods",
-          },
-        ],
-        default: "payments",
-        required: true,
-      },
-      // ----------------------------------
-      //        Payment operations
-      // ----------------------------------
-      {
-        displayName: "Operation",
-        name: "operation",
-        type: "options",
-        displayOptions: {
-          show: {
-            resource: ["payments"],
-          },
-        },
-        options: [
-          {
-            name: "Create",
-            value: "create",
-            description: "Create an entry",
-          },
-          {
-            name: "Get",
-            value: "get",
-            description: "Get data of an entry",
-          },
-          {
-            name: "Get All",
-            value: "getAll",
-            description: "Get data of all entries",
-          },
-          {
-            name: "Delete",
-            value: "delete",
-            description: "Delete an entry",
-          },
-          {
-            name: "Update",
-            value: "update",
-            description: "Update an entry",
-            displayOptions: {
-              show: {
-                resource: ["payments"],
-              },
-            },
-          },
-        ],
-        default: "getAll",
-        description: "The operation to perform.",
-      },
-      // ----------------------------------
-      //        Payment links operations
-      // ----------------------------------
-      {
-        displayName: "Operation",
-        name: "operation",
-        type: "options",
-        displayOptions: {
-          show: {
-            resource: ["paymentLinks"],
-          },
-        },
-        options: [
-          {
-            name: "Create",
-            value: "create",
-            description: "Create an entry",
-          },
-          {
-            name: "Get",
-            value: "get",
-            description: "Get data of an entry",
-          },
-          {
-            name: "Get All",
-            value: "getAll",
-            description: "Get data of all entries",
-          },
-        ],
-        default: "getAll",
-        description: "The operation to perform.",
-      },
+	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
+		const paymentUri = '/payments';
+		const paymentLinksUri = '/payment-links';
+		const methodsUri = '/methods';
+		const items = this.getInputData();
 
-      // ----------------------------------
-      //        Methods operations
-      // ----------------------------------
-      {
-        displayName: "Operation",
-        name: "operation",
-        type: "options",
-        displayOptions: {
-          show: {
-            resource: ["methods"],
-          },
-        },
-        options: [
-          {
-            name: "List payment",
-            value: "list",
-            description: "Retrieve all enabled payment methods.",
-          },
-          {
-            name: "List all payment",
-            value: "listAll",
-            description:
-              "Retrieve all payment methods that Mollie offers and can be activated by the Organization.",
-          },
-          {
-            name: "Get All",
-            value: "get",
-            description: "Retrieve a single method by its ID.",
-          },
-        ],
-        default: "list",
-        description: "The operation to perform.",
-      },
+		let responseData;
+		const body: IDataObject = {};
+		let method = '';
+		let uri = '';
+		const returnData: IDataObject[] = [];
+		for (let i = 0; i < items.length; i++) {
+			const isLiveKey = this.getNodeParameter('isLiveKey', i) as boolean;
+			const operation = this.getNodeParameter('operation', i) as string;
+			const resource = this.getNodeParameter('resource', i) as string;
 
-      /* -------------------------------------------------------------------------- */
-      /*                           operation:create                                 */
-      /* -------------------------------------------------------------------------- */
-      {
-        displayName: "Currency",
-        name: "currency",
-        type: "string",
-        default: "",
-        displayOptions: {
-          show: {
-            operation: ["create"],
-          },
-        },
-        required: true,
-      },
-      {
-        displayName: "Value",
-        name: "value",
-        type: "string",
-        description: "Make sure to send 2 decimals and omit the thousands separator, e.g. 'currency':'EUR', 'value':'1000.00' if you would want to charge €1000.00.",
-        default: "",
-        displayOptions: {
-          show: {
-            operation: ["create"],
-          },
-        },
-        required: true,
-      },
-      {
-        displayName: "Description",
-        name: "description",
-        type: "string",
-        default: "",
-        displayOptions: {
-          show: {
-            operation: ["create"],
-          },
-        },
-        required: true,
-      },
-      {
-        displayName: "Redirect Url",
-        name: "redirectUrl",
-        type: "string",
-        default: "",
-        displayOptions: {
-          show: {
-            operation: ["create"],
-            resource: ["paymentLinks"],
-          },
-        },
-        required: false,
-      },
-      {
-        displayName: "Redirect Url",
-        name: "redirectUrl",
-        type: "string",
-        default: "",
-        displayOptions: {
-          show: {
-            operation: ["create"],
-            resource: ["payments"],
-          },
-        },
-        required: false,
-      },
-      {
-        displayName: "Webhook Url",
-        name: "webhookUrl",
-        type: "string",
-        default: "",
-        displayOptions: {
-          show: {
-            operation: ["create"],
-          },
-        },
-        required: false,
-      },
-      {
-        displayName: "Order Id",
-        name: "order_id",
-        type: "string",
-        default: "",
-        displayOptions: {
-          show: {
-            operation: ["create"],
-            resource: ["payments"],
-          },
-        },
-        required: true,
-      },
+			try {
+				switch (operation) {
+					case 'create':
+						method = 'POST';
+						if (resource === 'payments') {
+							uri = paymentUri;
+							body.metadata = {
+								order_id: this.getNodeParameter('order_id', i) as string,
+							};
+						} else if (resource === 'paymentLinks') {
+							uri = paymentLinksUri;
+						}
+						body.amount = {
+							currency: this.getNodeParameter('currency', i) as string,
+							value: this.getNodeParameter('value', i)?.toString() as string,
+						};
+						(body.description = this.getNodeParameter('description', i) as string);
+							(body.redirectUrl = this.getNodeParameter('redirectUrl', i) as string);
+							(body.webhookUrl = this.getNodeParameter('webhookUrl', i) as string);
+						break;
 
-      /* -------------------------------------------------------------------------- */
-      /*                     operations:get,delete,update                           */
-      /* -------------------------------------------------------------------------- */
-      {
-        displayName: "ID",
-        name: "paymentID",
-        type: "string",
-        default: "",
-        displayOptions: {
-          show: {
-            operation: ["get", "delete", "update"],
-          },
-        },
-        required: true,
-      },
+					case 'list':
+						method = 'GET';
+						uri = methodsUri;
+						break;
 
-      /* -------------------------------------------------------------------------- */
-      /*                           operation:update                                 */
-      /* -------------------------------------------------------------------------- */
-      {
-        displayName: "Description",
-        name: "updateDescription",
-        type: "string",
-        default: "",
-        displayOptions: {
-          show: {
-            operation: ["update"],
-          },
-        },
-        required: false,
-      },
-      {
-        displayName: "Redirect Url",
-        name: "updateRedirectUrl",
-        type: "string",
-        default: "",
-        displayOptions: {
-          show: {
-            operation: ["update"],
-          },
-        },
-        required: false,
-      },
-      {
-        displayName: "Webhook Url",
-        name: "updateWebhookUrl",
-        type: "string",
-        default: "",
-        displayOptions: {
-          show: {
-            operation: ["update"],
-          },
-        },
-        required: false,
-      },
-      {
-        displayName: "Order Id",
-        name: "updateOrder_id",
-        type: "string",
-        default: "",
-        displayOptions: {
-          show: {
-            operation: ["update"],
-          },
-        },
-        required: false,
-      },
+					case 'listAll':
+						method = 'GET';
+						uri = `${methodsUri}/all`;
+						break;
 
-      /* -------------------------------------------------------------------------- */
-      /*                     operations:getAll                      */
-      /* -------------------------------------------------------------------------- */
-      {
-        displayName: "Limit",
-        name: "limit",
-        type: "number",
-        default: 250,
-        displayOptions: {
-          show: {
-            operation: ["getAll"],
-          },
-        },
-        required: false,
-      },
-    ],
-  };
+					case 'get':
+						method = 'GET';
+						if (resource === 'payments') {
+							uri = (paymentUri + '/' + this.getNodeParameter('paymentID', i)) as string;
+						} else if (resource === 'paymentLinks') {
+							uri = (paymentLinksUri +
+								'/' +
+								this.getNodeParameter('paymentID', i)) as string;
+						} else if (resource === 'methods') {
+							uri = (methodsUri + '/' + this.getNodeParameter('paymentID', i)) as string;
+						}
+						break;
 
-  async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
-    const paymentUri = "/payments";
-    const paymentLinksUri = "/payment-links";
-    const methodsUri = "/methods";
-    const items = this.getInputData();
+					case 'getAll':
+						const limit = this.getNodeParameter('limit', i) as string;
 
-    let responseData;
-    let body: any = {};
-    let method = "";
-    let uri = "";
-    const returnData: IDataObject[] = [];
-    for (let i = 0; i < items.length; i++) {
-      const isLiveKey = this.getNodeParameter("isLiveKey", i) as boolean;
-      const operation = this.getNodeParameter("operation", i) as string;
-      const resource = this.getNodeParameter("resource", i) as string;
+						method = 'GET';
+						if (resource === 'payments') {
+							uri = '/payments' + '?limit=' + limit;
+						} else if (resource === 'paymentLinks') {
+							uri = '/payment-links' + '?limit=' + limit;
+						}
+						break;
 
-      try {
-        switch (operation) {
-          case "create":
-            method = "POST";
-            if (resource === "payments") {
-              uri = paymentUri;
-              body.metadata = {
-                order_id: this.getNodeParameter("order_id", i) as string,
-              };
-            } else if (resource === "paymentLinks") {
-              uri = paymentLinksUri;
-            }
-            body.amount = {
-              currency: this.getNodeParameter("currency", i) as string,
-              value: this.getNodeParameter("value", i)?.toString() as string,
-            };
-            (body.description = this.getNodeParameter("description", i) as string),
-              (body.redirectUrl = this.getNodeParameter("redirectUrl", i) as string),
-              (body.webhookUrl = this.getNodeParameter("webhookUrl", i) as string);
-            break;
+					case 'delete':
+						method = 'DELETE';
+						uri = ('/payments/' + this.getNodeParameter('paymentID', i)) as string;
+						break;
 
-          case "list":
-            method = "GET";
-            uri = methodsUri;
-            break;
+					case 'update':
+						method = 'PATCH';
+						uri = ('/payments/' + this.getNodeParameter('paymentID', i)) as string;
+						body.description = this.getNodeParameter('updateDescription', i) as string;
+						(body.redirectUrl = this.getNodeParameter('updateRedirectUrl', i) as string);
+							(body.webhookUrl = this.getNodeParameter('updateWebhookUrl', i) as string);
+						const updateOrderId = this.getNodeParameter('updateOrderId', i) as string;
+						if (updateOrderId !== '') {
+							body.metadata = {
+								order_id: updateOrderId,
+							};
+						}
+						break;
 
-          case "listAll":
-            method = "GET";
-            uri = `${methodsUri}/all`;
-            break;
+					default:
+						break;
+				}
 
-          case "get":
-            method = "GET";
-            if (resource === "payments") {
-              uri = (paymentUri + "/" + this.getNodeParameter("paymentID", i)) as string;
-            } else if (resource === "paymentLinks") {
-              uri = (paymentLinksUri +
-                "/" +
-                this.getNodeParameter("paymentID", i)) as string;
-            } else if (resource === "methods") {
-              uri = (methodsUri + "/" + this.getNodeParameter("paymentID", i)) as string;
-            }
-            break;
+				responseData = await mollieApiRequest.call(this, method, body, uri, isLiveKey);
+				responseData = JSON.parse(responseData);
 
-          case "getAll":
-            const limit = this.getNodeParameter("limit", i) as string;
+				if (operation === 'getAll') {
+					switch (resource) {
+						case 'payments':
+							responseData = responseData['_embedded']['payments'];
+							break;
+						case 'paymentLinks':
+							responseData = responseData['_embedded']['payment_links'];
+							break;
+						case 'methods':
+							responseData = responseData['_embedded']['methods'];
+							break;
 
-            method = "GET";
-            if (resource === "payments") {
-              uri = "/payments" + "?limit=" + limit;
-            } else if (resource === "paymentLinks") {
-              uri = "/payment-links" + "?limit=" + limit;
-            }
-            break;
+						default:
+							break;
+					}
+				}
 
-          case "delete":
-            method = "DELETE";
-            uri = ("/payments/" + this.getNodeParameter("paymentID", i)) as string;
-            break;
+				if (Array.isArray(responseData)) {
+					returnData.push.apply(returnData, responseData as IDataObject[]);
+				} else {
+					returnData.push(responseData as IDataObject);
+				}
+			} catch (error) {
+				returnData.push(error as IDataObject);
+			}
+		}
 
-          case "update":
-            method = "PATCH";
-            uri = ("/payments/" + this.getNodeParameter("paymentID", i)) as string;
-            body.description = this.getNodeParameter("updateDescription", i) as string;
-            (body.redirectUrl = this.getNodeParameter("updateRedirectUrl", i) as string),
-              (body.webhookUrl = this.getNodeParameter("updateWebhookUrl", i) as string);
-            let updateOrder_id = this.getNodeParameter("updateOrder_id", i) as string;
-            if (updateOrder_id != "") {
-              body.metadata = {
-                order_id: this.getNodeParameter("updateOrder_id", i) as string,
-              };
-            }
-            break;
-
-          default:
-            break;
-        }
-
-        responseData = await mollieApiRequest.call(this, method, body, uri, isLiveKey);
-        responseData = JSON.parse(responseData);
-
-        if (operation === "getAll") {
-          switch (resource) {
-            case "payments":
-              responseData = responseData["_embedded"]["payments"];
-              break;
-            case "paymentLinks":
-              responseData = responseData["_embedded"]["payment_links"];
-              break;
-            case "methods":
-              responseData = responseData["_embedded"]["methods"];
-              break;
-
-            default:
-              break;
-          }
-        }
-
-        if (Array.isArray(responseData)) {
-          returnData.push.apply(returnData, responseData as IDataObject[]);
-        } else {
-          returnData.push(responseData as IDataObject);
-        }
-      } catch (error) {
-        returnData.push(error as IDataObject);
-      }
-    }
-
-    return [this.helpers.returnJsonArray(returnData)];
-  }
+		return [this.helpers.returnJsonArray(returnData)];
+	}
 }
