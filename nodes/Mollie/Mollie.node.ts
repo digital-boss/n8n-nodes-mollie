@@ -58,6 +58,10 @@ export class Mollie implements INodeType {
             name: "Payment links",
             value: "paymentLinks",
           },
+          {
+            name: "Methods",
+            value: "methods",
+          },
         ],
         default: "payments",
         required: true,
@@ -142,6 +146,40 @@ export class Mollie implements INodeType {
         description: "The operation to perform.",
       },
 
+      // ----------------------------------
+      //        Methods operations
+      // ----------------------------------
+      {
+        displayName: "Operation",
+        name: "operation",
+        type: "options",
+        displayOptions: {
+          show: {
+            resource: ["methods"],
+          },
+        },
+        options: [
+          {
+            name: "List payment",
+            value: "list",
+            description: "Retrieve all enabled payment methods.",
+          },
+          {
+            name: "List all payment",
+            value: "listAll",
+            description:
+              "Retrieve all payment methods that Mollie offers and can be activated by the Organization.",
+          },
+          {
+            name: "Get All",
+            value: "get",
+            description: "Retrieve a single method by its ID.",
+          },
+        ],
+        default: "list",
+        description: "The operation to perform.",
+      },
+
       /* -------------------------------------------------------------------------- */
       /*                           operation:create                                 */
       /* -------------------------------------------------------------------------- */
@@ -161,8 +199,7 @@ export class Mollie implements INodeType {
         displayName: "Value",
         name: "value",
         type: "string",
-        description:
-          "Make sure to send 2 decimals and omit the thousands separator, e.g. 'currency':'EUR', 'value':'1000.00' if you would want to charge €1000.00.",
+        description: "Make sure to send 2 decimals and omit the thousands separator, e.g. 'currency':'EUR', 'value':'1000.00' if you would want to charge €1000.00.",
         default: "",
         displayOptions: {
           show: {
@@ -324,6 +361,7 @@ export class Mollie implements INodeType {
   async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
     const paymentUri = "/payments";
     const paymentLinksUri = "/payment-links";
+    const methodsUri = "/methods";
     const items = this.getInputData();
 
     let responseData;
@@ -335,100 +373,102 @@ export class Mollie implements INodeType {
       const isLiveKey = this.getNodeParameter("isLiveKey", i) as boolean;
       const operation = this.getNodeParameter("operation", i) as string;
       const resource = this.getNodeParameter("resource", i) as string;
+
       try {
-        if (operation === "create") {
-          method = "POST";
-          if (resource === "payments") {
-            uri = paymentUri;
-            body.metadata = {
-              order_id: this.getNodeParameter("order_id", i) as string,
+        switch (operation) {
+          case "create":
+            method = "POST";
+            if (resource === "payments") {
+              uri = paymentUri;
+              body.metadata = {
+                order_id: this.getNodeParameter("order_id", i) as string,
+              };
+            } else if (resource === "paymentLinks") {
+              uri = paymentLinksUri;
+            }
+            body.amount = {
+              currency: this.getNodeParameter("currency", i) as string,
+              value: this.getNodeParameter("value", i)?.toString() as string,
             };
-          } else if (resource === "paymentLinks") {
-            uri = paymentLinksUri;
-          }
-          let value = this.getNodeParameter("value", i) as string;
+            (body.description = this.getNodeParameter("description", i) as string),
+              (body.redirectUrl = this.getNodeParameter("redirectUrl", i) as string),
+              (body.webhookUrl = this.getNodeParameter("webhookUrl", i) as string);
+            break;
 
-          body.amount = {
-            currency: this.getNodeParameter("currency", i) as string,
-            value: value.toString(),
-          };
-          (body.description = this.getNodeParameter(
-            "description",
-            i
-          ) as string),
-            (body.redirectUrl = this.getNodeParameter(
-              "redirectUrl",
-              i
-            ) as string),
-            (body.webhookUrl = this.getNodeParameter(
-              "webhookUrl",
-              i
-            ) as string);
-        } else if (operation === "get") {
-          method = "GET";
-          if (resource === "payments") {
-            uri = (paymentUri +
-              "/" +
-              this.getNodeParameter("paymentID", i)) as string;
-          } else if (resource === "paymentLinks") {
-            uri = (paymentLinksUri +
-              "/" +
-              this.getNodeParameter("paymentID", i)) as string;
-          }
-        } else if (operation === "getAll") {
-          const limit = this.getNodeParameter("limit", i) as string;
+          case "list":
+            method = "GET";
+            uri = methodsUri;
+            break;
 
-          method = "GET";
-          if (resource === "payments") {
-            uri = "/payments" + "?limit=" + limit;
-          } else if (resource === "paymentLinks") {
-            uri = "/payment-links" + "?limit=" + limit;
-          }
-        } else if (operation === "delete") {
-          method = "DELETE";
-          uri = ("/payments/" +
-            this.getNodeParameter("paymentID", i)) as string;
-        } else if (operation === "update") {
-          method = "PATCH";
-          uri = ("/payments/" +
-            this.getNodeParameter("paymentID", i)) as string;
-          body.description = this.getNodeParameter(
-            "updateDescription",
-            i
-          ) as string;
-          (body.redirectUrl = this.getNodeParameter(
-            "updateRedirectUrl",
-            i
-          ) as string),
-            (body.webhookUrl = this.getNodeParameter(
-              "updateWebhookUrl",
-              i
-            ) as string);
-          let updateOrder_id = this.getNodeParameter(
-            "updateOrder_id",
-            i
-          ) as string;
-          if (updateOrder_id != "") {
-            body.metadata = {
-              order_id: this.getNodeParameter("updateOrder_id", i) as string,
-            };
-          }
+          case "listAll":
+            method = "GET";
+            uri = `${methodsUri}/all`;
+            break;
+
+          case "get":
+            method = "GET";
+            if (resource === "payments") {
+              uri = (paymentUri + "/" + this.getNodeParameter("paymentID", i)) as string;
+            } else if (resource === "paymentLinks") {
+              uri = (paymentLinksUri +
+                "/" +
+                this.getNodeParameter("paymentID", i)) as string;
+            } else if (resource === "methods") {
+              uri = (methodsUri + "/" + this.getNodeParameter("paymentID", i)) as string;
+            }
+            break;
+
+          case "getAll":
+            const limit = this.getNodeParameter("limit", i) as string;
+
+            method = "GET";
+            if (resource === "payments") {
+              uri = "/payments" + "?limit=" + limit;
+            } else if (resource === "paymentLinks") {
+              uri = "/payment-links" + "?limit=" + limit;
+            }
+            break;
+
+          case "delete":
+            method = "DELETE";
+            uri = ("/payments/" + this.getNodeParameter("paymentID", i)) as string;
+            break;
+
+          case "update":
+            method = "PATCH";
+            uri = ("/payments/" + this.getNodeParameter("paymentID", i)) as string;
+            body.description = this.getNodeParameter("updateDescription", i) as string;
+            (body.redirectUrl = this.getNodeParameter("updateRedirectUrl", i) as string),
+              (body.webhookUrl = this.getNodeParameter("updateWebhookUrl", i) as string);
+            let updateOrder_id = this.getNodeParameter("updateOrder_id", i) as string;
+            if (updateOrder_id != "") {
+              body.metadata = {
+                order_id: this.getNodeParameter("updateOrder_id", i) as string,
+              };
+            }
+            break;
+
+          default:
+            break;
         }
 
-        responseData = await mollieApiRequest.call(
-          this,
-          method,
-          body,
-          uri,
-          isLiveKey
-        );
+        responseData = await mollieApiRequest.call(this, method, body, uri, isLiveKey);
         responseData = JSON.parse(responseData);
+
         if (operation === "getAll") {
-          console.log(responseData);
-          if (resource === "payments") {
-            responseData = responseData["_embedded"]["payments"];
-          } else if (resource === "paymentLinks") {
-            responseData = responseData["_embedded"]["payment_links"];
+          switch (resource) {
+            case "payments":
+              responseData = responseData["_embedded"]["payments"];
+              break;
+            case "paymentLinks":
+              responseData = responseData["_embedded"]["payment_links"];
+              break;
+            case "methods":
+              responseData = responseData["_embedded"]["methods"];
+              break;
+
+            default:
+              break;
           }
         }
 
