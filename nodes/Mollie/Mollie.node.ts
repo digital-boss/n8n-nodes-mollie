@@ -22,7 +22,6 @@ import {
 	paymentsOperations,
 } from './descriptions';
 
-
 import { version } from '../version';
 
 export class Mollie implements INodeType {
@@ -45,7 +44,6 @@ export class Mollie implements INodeType {
 				required: true,
 			},
 		],
-
 		properties: [
 			{
 				displayName: 'Live Api Key',
@@ -86,92 +84,151 @@ export class Mollie implements INodeType {
 	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
-		const paymentUri = '/payments';
-		const paymentLinksUri = '/payment-links';
-		const methodsUri = '/methods';
-		const items = this.getInputData();
+	const items = this.getInputData();
 
 		let responseData;
 		const body: IDataObject = {};
+		const qs: IDataObject = {};
 		let method = '';
-		let uri = '';
+		let endpoint = '';
 		const returnData: IDataObject[] = [];
 		for (let i = 0; i < items.length; i++) {
 			const isLiveKey = this.getNodeParameter('isLiveKey', i) as boolean;
-			const operation = this.getNodeParameter('operation', i) as string;
 			const resource = this.getNodeParameter('resource', i) as string;
+			const operation = this.getNodeParameter('operation', i) as string;
 
 			try {
-				switch (operation) {
-					case 'create':
-						method = 'POST';
-						if (resource === 'payments') {
-							uri = paymentUri;
-							body.metadata = {
-								order_id: this.getNodeParameter('order_id', i) as string,
-							};
-						} else if (resource === 'paymentLinks') {
-							uri = paymentLinksUri;
+				switch (resource) {
+					case 'payments':
+						const paymentUrl = '/payments';
+						switch (operation) {
+							case 'create':
+								// ----------------------------------
+								//        payments:create
+								// ----------------------------------
+								endpoint = paymentUrl;
+								method = 'POST';
+								body.metadata = {
+									order_id: this.getNodeParameter('orderId', i) as string,
+								};
+								body.amount = {
+									currency: this.getNodeParameter('currency', i) as string,
+									value: this.getNodeParameter('value', i) as string,
+								};
+								body.description = this.getNodeParameter('description', i) as string;
+								body.redirectUrl = this.getNodeParameter('redirectUrl', i) as string;
+								Object.assign(body, this.getNodeParameter('additionalFields', i) as IDataObject);
+								break;
+
+							case 'delete':
+								// ----------------------------------
+								//        payments:delete
+								// ----------------------------------
+								endpoint = paymentUrl + '/' + this.getNodeParameter('id', i) as string;
+								method = 'DELETE';
+								break;
+
+							case 'get':
+								// ----------------------------------
+								//        payments:get
+								// ----------------------------------
+								endpoint = paymentUrl + '/' + this.getNodeParameter('id', i) as string;
+								method = 'GET';
+								break;
+
+							case 'list':
+								// ----------------------------------
+								//        payments:list
+								// ----------------------------------
+								endpoint = paymentUrl;
+								method = 'GET';
+								Object.assign(qs, this.getNodeParameter('additionalParameters', i) as IDataObject);
+								break;
+
+							case 'update':
+								// ----------------------------------
+								//        payments:update
+								// ----------------------------------
+								endpoint = paymentUrl + '/' + this.getNodeParameter('id', i) as string;
+								method = 'PATCH';
+								Object.assign(body, this.getNodeParameter('additionalFields', i) as IDataObject);
+								break;
+
+							default:
+								break;
 						}
-						body.amount = {
-							currency: this.getNodeParameter('currency', i) as string,
-							value: this.getNodeParameter('value', i)?.toString() as string,
-						};
-						(body.description = this.getNodeParameter('description', i) as string);
-							(body.redirectUrl = this.getNodeParameter('redirectUrl', i) as string);
-							(body.webhookUrl = this.getNodeParameter('webhookUrl', i) as string);
 						break;
 
-					case 'list':
-						method = 'GET';
-						uri = methodsUri;
-						break;
+					case 'paymentLinks':
+						const paymentLinksUrl = '/payment-links';
+						switch (operation) {
+							case 'create':
+								// ----------------------------------
+								//        paymentLinks:create
+								// ----------------------------------
+								endpoint = paymentLinksUrl;
+								method = 'POST';
+								body.amount = {
+									currency: this.getNodeParameter('currency', i) as string,
+									value: this.getNodeParameter('value', i) as string,
+								};
+								body.description = this.getNodeParameter('description', i) as string;
+								Object.assign(body, this.getNodeParameter('additionalFields', i) as IDataObject);
+								break;
 
-					case 'listAll':
-						method = 'GET';
-						uri = `${methodsUri}/all`;
-						break;
+							case 'get':
+								// ----------------------------------
+								//        paymentLinks:get
+								// ----------------------------------
+								endpoint = paymentLinksUrl + '/' + this.getNodeParameter('id', i) as string;
+								method = 'GET';
+								break;
 
-					case 'get':
-						method = 'GET';
-						if (resource === 'payments') {
-							uri = (paymentUri + '/' + this.getNodeParameter('paymentID', i)) as string;
-						} else if (resource === 'paymentLinks') {
-							uri = (paymentLinksUri +
-								'/' +
-								this.getNodeParameter('paymentID', i)) as string;
-						} else if (resource === 'methods') {
-							uri = (methodsUri + '/' + this.getNodeParameter('paymentID', i)) as string;
+							case 'list':
+								// ----------------------------------
+								//        paymentLinks:list
+								// ----------------------------------
+								endpoint = paymentLinksUrl;
+								method = 'GET';
+								Object.assign(qs, this.getNodeParameter('additionalParameters', i) as IDataObject);
+
+								break;
+
+							default:
+								break;
 						}
+
 						break;
 
-					case 'getAll':
-						const limit = this.getNodeParameter('limit', i) as string;
+					case 'methods':
+						const methodsUri = '/methods';
+						switch (operation) {
+							case 'list':
+								// ----------------------------------
+								//        methods:list
+								// ----------------------------------
+								endpoint = methodsUri;
+								method = 'GET';
+								break;
 
-						method = 'GET';
-						if (resource === 'payments') {
-							uri = '/payments' + '?limit=' + limit;
-						} else if (resource === 'paymentLinks') {
-							uri = '/payment-links' + '?limit=' + limit;
-						}
-						break;
+							case 'listAll':
+								// ----------------------------------
+								//        methods:listAll
+								// ----------------------------------
+								endpoint = methodsUri + '/all';
+								method = 'GET';
+								break;
 
-					case 'delete':
-						method = 'DELETE';
-						uri = ('/payments/' + this.getNodeParameter('paymentID', i)) as string;
-						break;
+							case 'get':
+								// ----------------------------------
+								//        methods:get
+								// ----------------------------------
+								endpoint = methodsUri + '/' + this.getNodeParameter('id', i) as string;
+								method = 'GET';
+								break;
 
-					case 'update':
-						method = 'PATCH';
-						uri = ('/payments/' + this.getNodeParameter('paymentID', i)) as string;
-						body.description = this.getNodeParameter('updateDescription', i) as string;
-						(body.redirectUrl = this.getNodeParameter('updateRedirectUrl', i) as string);
-							(body.webhookUrl = this.getNodeParameter('updateWebhookUrl', i) as string);
-						const updateOrderId = this.getNodeParameter('updateOrderId', i) as string;
-						if (updateOrderId !== '') {
-							body.metadata = {
-								order_id: updateOrderId,
-							};
+							default:
+								break;
 						}
 						break;
 
@@ -179,25 +236,25 @@ export class Mollie implements INodeType {
 						break;
 				}
 
-				responseData = await mollieApiRequest.call(this, method, body, uri, isLiveKey);
+				responseData = await mollieApiRequest.call(this, method, endpoint, qs, body, isLiveKey);
 				responseData = JSON.parse(responseData);
 
-				if (operation === 'getAll') {
-					switch (resource) {
-						case 'payments':
-							responseData = responseData['_embedded']['payments'];
-							break;
-						case 'paymentLinks':
-							responseData = responseData['_embedded']['payment_links'];
-							break;
-						case 'methods':
-							responseData = responseData['_embedded']['methods'];
-							break;
-
-						default:
-							break;
-					}
-				}
+				// if (operation === 'getAll') {
+				// 	switch (resource) {
+				// 		case 'payments':
+				// 			responseData = responseData['_embedded']['payments'];
+				// 			break;
+				// 		case 'paymentLinks':
+				// 			responseData = responseData['_embedded']['payment_links'];
+				// 			break;
+				// 		case 'methods':
+				// 			responseData = responseData['_embedded']['methods'];
+				// 			break;
+				//
+				// 		default:
+				// 			break;
+				// 	}
+				// }
 
 				if (Array.isArray(responseData)) {
 					returnData.push.apply(returnData, responseData as IDataObject[]);

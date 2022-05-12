@@ -22,19 +22,19 @@ export const paymentsOperations: INodeProperties[] = [
 				description: 'Create an entry',
 			},
 			{
+				name: 'Delete',
+				value: 'delete',
+				description: 'Delete an entry',
+			},
+			{
 				name: 'Get',
 				value: 'get',
 				description: 'Get data of an entry',
 			},
 			{
-				name: 'Get All',
-				value: 'getAll',
+				name: 'List',
+				value: 'list',
 				description: 'Get data of all entries',
-			},
-			{
-				name: 'Delete',
-				value: 'delete',
-				description: 'Delete an entry',
 			},
 			{
 				name: 'Update',
@@ -49,6 +49,19 @@ export const paymentsFields: INodeProperties[] = [
 	/*-------------------------------------------------------------------------- */
 	/*                                payments:create                            */
 	/* ------------------------------------------------------------------------- */
+	{
+		displayName: 'Order ID',
+		name: 'orderId',
+		required: true,
+		type: 'string',
+		default: '',
+		displayOptions: {
+			show: {
+				resource: ['payments'],
+				operation: ['create'],
+			},
+		},
+	},
 	{
 		displayName: 'Currency',
 		name: 'currency',
@@ -90,9 +103,8 @@ export const paymentsFields: INodeProperties[] = [
 		},
 	},
 	{
-		displayName: 'Redirect Url',
+		displayName: 'Redirect URL',
 		name: 'redirectUrl',
-		required: false,
 		type: 'string',
 		default: '',
 		displayOptions: {
@@ -103,64 +115,25 @@ export const paymentsFields: INodeProperties[] = [
 		},
 	},
 	{
-		displayName: 'Webhook Url',
-		name: 'webhookUrl',
-		required: false,
-		type: 'string',
-		default: '',
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
 		displayOptions: {
 			show: {
 				resource: ['payments'],
 				operation: ['create'],
 			},
 		},
-	},
-	{
-		displayName: 'Order Id',
-		name: 'order_id',
-		required: true,
-		type: 'string',
-		default: '',
-		displayOptions: {
-			show: {
-				resource: ['payments'],
-				operation: ['create'],
+		options: [
+			{
+				displayName: 'Webhook URL',
+				name: 'webhookUrl',
+				type: 'string',
+				default: '',
 			},
-		},
-	},
-
-	/*-------------------------------------------------------------------------- */
-	/*                                payments:get	                             */
-	/* ------------------------------------------------------------------------- */
-	{
-		displayName: 'ID',
-		name: 'paymentID',
-		required: true,
-		type: 'string',
-		default: '',
-		displayOptions: {
-			show: {
-				resource: ['payments'],
-				operation: ['get'],
-			},
-		},
-	},
-
-	/*-------------------------------------------------------------------------- */
-	/*                                payments:getAll                            */
-	/* ------------------------------------------------------------------------- */
-	{
-		displayName: 'Limit',
-		name: 'limit',
-		required: false,
-		type: 'number',
-		default: 250,
-		displayOptions: {
-			show: {
-				resource: ['payments'],
-				operation: ['getAll'],
-			},
-		},
+		],
 	},
 
 	/*-------------------------------------------------------------------------- */
@@ -168,7 +141,7 @@ export const paymentsFields: INodeProperties[] = [
 	/* ------------------------------------------------------------------------- */
 	{
 		displayName: 'ID',
-		name: 'paymentID',
+		name: 'id',
 		required: true,
 		type: 'string',
 		default: '',
@@ -181,11 +154,53 @@ export const paymentsFields: INodeProperties[] = [
 	},
 
 	/*-------------------------------------------------------------------------- */
+	/*                                payments:get	                             */
+	/* ------------------------------------------------------------------------- */
+	{
+		displayName: 'ID',
+		name: 'id',
+		required: true,
+		type: 'string',
+		default: '',
+		displayOptions: {
+			show: {
+				resource: ['payments'],
+				operation: ['get'],
+			},
+		},
+	},
+
+	/*-------------------------------------------------------------------------- */
+	/*                                payments:list                              */
+	/* ------------------------------------------------------------------------- */
+	{
+		displayName: 'Additional Parameters',
+		name: 'additionalParameters',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['payments'],
+				operation: ['list'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Limit',
+				name: 'limit',
+				type: 'number',
+				default: 250,
+			},
+		],
+	},
+
+	/*-------------------------------------------------------------------------- */
 	/*                                payments:update                            */
 	/* ------------------------------------------------------------------------- */
 	{
 		displayName: 'ID',
-		name: 'paymentID',
+		name: 'id',
 		required: true,
 		type: 'string',
 		default: '',
@@ -197,55 +212,43 @@ export const paymentsFields: INodeProperties[] = [
 		},
 	},
 	{
-		displayName: 'Description',
-		name: 'updateDescription',
-		required: false,
-		type: 'string',
-		default: '',
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
 		displayOptions: {
 			show: {
 				resource: ['payments'],
 				operation: ['update'],
 			},
 		},
-	},
-	{
-		displayName: 'Redirect Url',
-		name: 'updateRedirectUrl',
-		required: false,
-		type: 'string',
-		default: '',
-		displayOptions: {
-			show: {
-				resource: ['payments'],
-				operation: ['update'],
+		options: [
+			{
+				displayName: 'Description',
+				name: 'description',
+				type: 'string',
+				default: '',
 			},
-		},
-	},
-	{
-		displayName: 'Webhook Url',
-		name: 'updateWebhookUrl',
-		required: false,
-		type: 'string',
-		default: '',
-		displayOptions: {
-			show: {
-				operation: ['update'],
+			{
+				displayName: 'Redirect Url',
+				name: 'redirectUrl',
+				type: 'string',
+				default: '',
 			},
-		},
-	},
-	{
-		displayName: 'Order Id',
-		name: 'updateOrderId',
-		required: false,
-		type: 'string',
-		default: '',
-		displayOptions: {
-			show: {
-				resource: ['payments'],
-				operation: ['update'],
+			{
+				displayName: 'Webhook Url',
+				name: 'webhookUrl',
+				type: 'string',
+				default: '',
 			},
-		},
+			{
+				displayName: 'Order Id',
+				name: 'orderId',
+				type: 'string',
+				default: '',
+			},
+		],
 	},
 
 ];

@@ -15,18 +15,22 @@ export async function mollieApiRequest(
 		| IExecuteSingleFunctions
 		| ILoadOptionsFunctions,
 		method: string,
+		endpoint: string,
+		qs: IDataObject = {},
 		body: IDataObject = {},
-		uri: string,
 		isLiveKey: boolean,
+		uri?: string,
 	// tslint:disable-next-line:no-any
 ): Promise<any> {
+
 	const options: OptionsWithUri = {
 		headers: {
 			'Content-Type': 'application/json',
 		},
+		qs,
 		body,
 		method,
-		uri: `https://api.mollie.com/v2${uri}`,
+		uri: uri || `https://api.mollie.com/v2${endpoint}`,
 	};
 	const credentials = await this.getCredentials('mollieApi');
 	if (isLiveKey && credentials !== undefined && credentials.mollieApiKey) {

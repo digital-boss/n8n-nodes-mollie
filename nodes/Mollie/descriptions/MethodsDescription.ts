@@ -17,12 +17,12 @@ export const methodsOperations: INodeProperties[] = [
 		description: 'The operation to perform',
 		options: [
 			{
-				name: 'List payment',
+				name: 'List',
 				value: 'list',
 				description: 'Retrieve all enabled payment methods',
 			},
 			{
-				name: 'List all payment',
+				name: 'List all',
 				value: 'listAll',
 				description:
 					'Retrieve all payment methods that Mollie offers and can be activated by the Organization',
@@ -49,11 +49,11 @@ export const methodsFields: INodeProperties[] = [
 	/*                                methods:get                             	 */
 	/* ------------------------------------------------------------------------- */
 	{
-		displayName: 'Limit',
-		name: 'limit',
-		required: false,
-		type: 'number',
-		default: 250,
+		displayName: 'ID',
+		name: 'id',
+		required: true,
+		type: 'string',
+		default: '',
 		displayOptions: {
 			show: {
 				resource: ['methods'],

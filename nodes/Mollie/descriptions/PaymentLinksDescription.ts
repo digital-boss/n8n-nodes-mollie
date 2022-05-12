@@ -13,7 +13,7 @@ export const paymentLinksOperations: INodeProperties[] = [
 				resource: ['paymentLinks'],
 			},
 		},
-		default: 'getAll',
+		default: 'list',
 		description: 'The operation to perform.',
 		options: [
 			{
@@ -27,8 +27,8 @@ export const paymentLinksOperations: INodeProperties[] = [
 				description: 'Get data of an entry',
 			},
 			{
-				name: 'Get All',
-				value: 'getAll',
+				name: 'List',
+				value: 'list',
 				description: 'Get data of all entries',
 			},
 		],
@@ -42,6 +42,7 @@ export const paymentLinksFields: INodeProperties[] = [
 	{
 		displayName: 'Currency',
 		name: 'currency',
+		required: true,
 		type: 'string',
 		default: '',
 		displayOptions: {
@@ -50,11 +51,11 @@ export const paymentLinksFields: INodeProperties[] = [
 				operation: ['create'],
 			},
 		},
-		required: true,
 	},
 	{
 		displayName: 'Value',
 		name: 'value',
+		required: true,
 		type: 'string',
 		description: 'Make sure to send 2 decimals and omit the thousands separator, e.g. \'currency\':\'EUR\', \'value\':\'1000.00\' if you would want to charge €1000.00.',
 		default: '',
@@ -64,7 +65,6 @@ export const paymentLinksFields: INodeProperties[] = [
 				operation: ['create'],
 			},
 		},
-		required: true,
 	},
 	{
 		displayName: 'Description',
@@ -77,33 +77,33 @@ export const paymentLinksFields: INodeProperties[] = [
 				operation: ['create'],
 			},
 		},
-		required: true,
 	},
 	{
-		displayName: 'Redirect Url',
-		name: 'redirectUrl',
-		type: 'string',
-		default: '',
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
 		displayOptions: {
 			show: {
 				resource: ['paymentLinks'],
 				operation: ['create'],
 			},
 		},
-		required: false,
-	},
-	{
-		displayName: 'Webhook Url',
-		name: 'webhookUrl',
-		type: 'string',
-		default: '',
-		displayOptions: {
-			show: {
-				resource: ['paymentLinks'],
-				operation: ['create'],
+		options: [
+			{
+				displayName: 'Redirect Url',
+				name: 'redirectUrl',
+				type: 'string',
+				default: '',
 			},
-		},
-		required: false,
+			{
+				displayName: 'Webhook Url',
+				name: 'webhookUrl',
+				type: 'string',
+				default: '',
+			},
+		],
 	},
 
 	/*-------------------------------------------------------------------------- */
@@ -111,7 +111,7 @@ export const paymentLinksFields: INodeProperties[] = [
 	/* ------------------------------------------------------------------------- */
 	{
 		displayName: 'ID',
-		name: 'paymentID',
+		name: 'id',
 		required: true,
 		type: 'string',
 		default: '',
@@ -124,20 +124,28 @@ export const paymentLinksFields: INodeProperties[] = [
 	},
 
 	/*-------------------------------------------------------------------------- */
-	/*                                payments:getAll                            */
+	/*                                payments:list                            */
 	/* ------------------------------------------------------------------------- */
 	{
-		displayName: 'Limit',
-		name: 'limit',
-		required: false,
-		type: 'number',
-		default: 250,
+		displayName: 'Additional Parameters',
+		name: 'additionalParameters',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
 		displayOptions: {
 			show: {
 				resource: ['paymentLinks'],
-				operation: ['getAll'],
+				operation: ['list'],
 			},
 		},
+		options: [
+			{
+				displayName: 'Limit',
+				name: 'limit',
+				type: 'number',
+				default: 250,
+			},
+		],
 	},
 
 ];
