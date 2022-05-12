@@ -12,6 +12,7 @@ import {
 import {
 	mollieApiRequest
 } from './GenericFunctions';
+
 import {
 	methodsFields,
 	methodsOperations,
@@ -21,6 +22,9 @@ import {
 	paymentsOperations,
 } from './descriptions';
 
+
+import { version } from '../version';
+
 export class Mollie implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Mollie',
@@ -28,7 +32,7 @@ export class Mollie implements INodeType {
 		icon: 'file:mollie.png',
 		group: ['transform'],
 		version: 1,
-		description: 'Mollie REST API',
+		description: `Consume Mollie API (v.${version})`,
 		defaults: {
 			name: 'Mollie',
 			color: '#772244',
