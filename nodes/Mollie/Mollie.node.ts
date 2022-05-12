@@ -31,6 +31,7 @@ export class Mollie implements INodeType {
 		icon: 'file:mollie.png',
 		group: ['transform'],
 		version: 1,
+		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
 		description: `Consume Mollie API (v.${version})`,
 		defaults: {
 			name: 'Mollie',
