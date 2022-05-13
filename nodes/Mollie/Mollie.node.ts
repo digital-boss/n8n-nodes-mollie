@@ -7,6 +7,7 @@ import {
 	INodeExecutionData,
 	INodeType,
 	INodeTypeDescription,
+	NodeApiError,
 } from 'n8n-workflow';
 
 import {
@@ -241,6 +242,10 @@ export class Mollie implements INodeType {
 				responseData = await mollieApiRequest.call(this, method, endpoint, qs, body, isLiveKey);
 				responseData = JSON.parse(responseData);
 
+				if (responseData.name === 'Error') {
+					throw new NodeApiError(this.getNode(), responseData);
+				}
+
 				if (operation === 'list' || operation === 'listAll') {
 					switch (resource) {
 						case 'payments':
@@ -264,10 +269,13 @@ export class Mollie implements INodeType {
 					returnData.push(responseData as IDataObject);
 				}
 			} catch (error) {
-				returnData.push(error as IDataObject);
+				if (this.continueOnFail()) {
+					returnData.push({ error: error.message });
+					continue;
+				}
+				throw error;
 			}
 		}
-
 		return [this.helpers.returnJsonArray(returnData)];
 	}
 }
