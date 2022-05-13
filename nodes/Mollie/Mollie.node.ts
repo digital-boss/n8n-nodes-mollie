@@ -87,19 +87,19 @@ export class Mollie implements INodeType {
 	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
-	const items = this.getInputData();
-
+		const items = this.getInputData();
 		let responseData;
 		const body: IDataObject = {};
 		const qs: IDataObject = {};
 		let method = '';
 		let endpoint = '';
 		const returnData: IDataObject[] = [];
-		for (let i = 0; i < items.length; i++) {
-			const isLiveKey = this.getNodeParameter('isLiveKey', i) as boolean;
-			const resource = this.getNodeParameter('resource', i) as string;
-			const operation = this.getNodeParameter('operation', i) as string;
 
+		const isLiveKey = this.getNodeParameter('isLiveKey', 0) as boolean;
+		const resource = this.getNodeParameter('resource', 0) as string;
+		const operation = this.getNodeParameter('operation', 0) as string;
+
+		for (let i = 0; i < items.length; i++) {
 			try {
 				switch (resource) {
 					case 'payments':
