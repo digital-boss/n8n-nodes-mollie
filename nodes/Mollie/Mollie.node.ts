@@ -114,7 +114,7 @@ export class Mollie implements INodeType {
 								};
 								body.amount = {
 									currency: this.getNodeParameter('currency', i) as string,
-									value: this.getNodeParameter('value', i) as string,
+									value: (this.getNodeParameter('value', i) as string).toString(), // Ensure sending a string value
 								};
 								body.description = this.getNodeParameter('description', i) as string;
 								body.redirectUrl = this.getNodeParameter('redirectUrl', i) as string;
@@ -171,7 +171,7 @@ export class Mollie implements INodeType {
 								method = 'POST';
 								body.amount = {
 									currency: this.getNodeParameter('currency', i) as string,
-									value: this.getNodeParameter('value', i) as string,
+									value: (this.getNodeParameter('value', i) as string).toString(), // Ensure sending a string value
 								};
 								body.description = this.getNodeParameter('description', i) as string;
 								Object.assign(body, this.getNodeParameter('additionalFields', i) as IDataObject);
