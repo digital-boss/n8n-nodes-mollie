@@ -41,3 +41,7 @@ export async function mollieApiRequest(
 	}
 	return await this.helpers.request!(options);
 }
+
+export function simplify(jsonData: IDataObject, propertyName: string): IDataObject {
+	return (jsonData['_embedded'] as IDataObject)[propertyName] as IDataObject || jsonData;
+}

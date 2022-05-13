@@ -10,7 +10,8 @@ import {
 } from 'n8n-workflow';
 
 import {
-	mollieApiRequest
+	mollieApiRequest,
+	simplify
 } from './GenericFunctions';
 
 import {
@@ -240,22 +241,22 @@ export class Mollie implements INodeType {
 				responseData = await mollieApiRequest.call(this, method, endpoint, qs, body, isLiveKey);
 				responseData = JSON.parse(responseData);
 
-				// if (operation === 'getAll') {
-				// 	switch (resource) {
-				// 		case 'payments':
-				// 			responseData = responseData['_embedded']['payments'];
-				// 			break;
-				// 		case 'paymentLinks':
-				// 			responseData = responseData['_embedded']['payment_links'];
-				// 			break;
-				// 		case 'methods':
-				// 			responseData = responseData['_embedded']['methods'];
-				// 			break;
-				//
-				// 		default:
-				// 			break;
-				// 	}
-				// }
+				if (operation === 'list' || operation === 'listAll') {
+					switch (resource) {
+						case 'payments':
+							responseData = simplify(responseData, 'payments');
+							break;
+						case 'paymentLinks':
+							responseData = simplify(responseData, 'payment_links');
+							break;
+						case 'methods':
+							responseData = simplify(responseData, 'methods');
+							break;
+
+						default:
+							break;
+					}
+				}
 
 				if (Array.isArray(responseData)) {
 					returnData.push.apply(returnData, responseData as IDataObject[]);
