@@ -254,11 +254,10 @@ export class Mollie implements INodeType {
 								method = 'POST';
 								body.amount = {
 									currency: this.getNodeParameter('currency', i) as string,
-									value: this.getNodeParameter('value', i) as string,
+									value: (this.getNodeParameter('value', i) as string).toString(),
 								};
 								body.description = this.getNodeParameter('description', i) as string;
 								body.metadata = this.getNodeParameter('metadata', i) as string;
-								Object.assign(body, this.getNodeParameter('additionalFields', i) as IDataObject);
 								break;
 
 							case 'listPayment':

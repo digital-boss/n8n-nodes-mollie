@@ -112,20 +112,6 @@ export const refundsFields: INodeProperties[] = [
 			},
 		},
 	},
-	{
-		displayName: 'Additional Fields',
-		name: 'additionalFields',
-		type: 'collection',
-		placeholder: 'Add Field',
-		default: {},
-		displayOptions: {
-			show: {
-				resource: ['refunds'],
-				operation: ['create'],
-			},
-		},
-	},
-
 	/*-------------------------------------------------------------------------- */
 	/*                                refunds:cancel                            */
 	/* ------------------------------------------------------------------------- */
