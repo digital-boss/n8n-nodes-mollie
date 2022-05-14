@@ -339,9 +339,12 @@ export class Mollie implements INodeType {
 				}
 
 				responseData = await mollieApiRequest.call(this, method, endpoint, qs, body, isLiveKey);
-				responseData = JSON.parse(responseData);
+				// Delete returns 204 with no body
+				if(responseData) {
+					responseData = JSON.parse(responseData);
+				}
 
-				if (responseData.name === 'Error') {
+				if (responseData?.name === 'Error') {
 					throw new NodeApiError(this.getNode(), responseData);
 				}
 
