@@ -345,7 +345,7 @@ export class Mollie implements INodeType {
 					throw new NodeApiError(this.getNode(), responseData);
 				}
 
-				if (operation === 'list' || operation === 'listAll') {
+				if (operation.startsWith('list')) {
 					switch (resource) {
 						case 'payments':
 							responseData = simplify(responseData, 'payments');
@@ -355,6 +355,9 @@ export class Mollie implements INodeType {
 							break;
 						case 'methods':
 							responseData = simplify(responseData, 'methods');
+							break;
+						case 'refunds':
+							responseData = simplify(responseData, 'refunds');
 							break;
 
 						default:
