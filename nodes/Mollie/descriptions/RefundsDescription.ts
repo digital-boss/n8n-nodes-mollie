@@ -209,7 +209,7 @@ export const refundsFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['refunds'],
-				operation: ['delete'],
+				operation: ['deletePayment'],
 			},
 		},
 	},
@@ -222,7 +222,7 @@ export const refundsFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['refunds'],
-				operation: ['delete'],
+				operation: ['deletePayment'],
 			},
 		},
 	},
@@ -239,7 +239,7 @@ export const refundsFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['refunds'],
-				operation: ['get'],
+				operation: ['getPayment'],
 			},
 		},
 	},
@@ -252,7 +252,7 @@ export const refundsFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['refunds'],
-				operation: ['get'],
+				operation: ['getPayment'],
 			},
 		},
 	},
