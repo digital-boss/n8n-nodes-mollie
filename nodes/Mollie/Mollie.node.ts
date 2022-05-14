@@ -1,4 +1,4 @@
-import { IExecuteFunctions } from "n8n-core";
+import { IExecuteFunctions } from 'n8n-core';
 
 import {
 	IDataObject,
@@ -6,9 +6,9 @@ import {
 	INodeType,
 	INodeTypeDescription,
 	NodeApiError,
-} from "n8n-workflow";
+} from 'n8n-workflow';
 
-import { mollieApiRequest, simplify } from "./GenericFunctions";
+import { mollieApiRequest, simplify } from './GenericFunctions';
 
 import {
 	methodsFields,
@@ -17,37 +17,38 @@ import {
 	paymentLinksOperations,
 	paymentsFields,
 	paymentsOperations,
-} from "./descriptions";
+} from './descriptions';
 
-import { version } from "../version";
+import { version } from '../version';
 
 const parseParams = (params: any): any => {
 	const optionalLength = Object.keys(params).length;
 	const optionalData = Object.keys(params).map(
 		(firstKey: string, firstIndex: number) => {
-			let rowString = "";
-			if (firstIndex === 0) rowString = "?";
+			let rowString = '';
+			if (firstIndex === 0) rowString = '?';
 
 			let value = params[firstKey];
 			if (
-				value.slice(0, 1) === "{" &&
-				value.slice(value.length - 1, value.length) === "}"
+				value.slice(0, 1) === '{' &&
+				value.slice(value.length - 1, value.length) === '}'
 			) {
 				const parsedValue = JSON.parse(value);
 				const parsedValueLength = Object.keys(parsedValue).length;
 				const attributes = Object.keys(parsedValue).map(
 					(keySecond: string, secondIndex: number) => {
-						let attributeString = "";
+						let attributeString = '';
 
 						attributeString += `${firstKey}[${keySecond}]=${parsedValue[keySecond]}`;
-						if (secondIndex !== parsedValueLength - 1)
+						if (secondIndex !== parsedValueLength - 1) {
 							attributeString = `${attributeString}&`;
+						}
 
 						return attributeString;
-					}
+					},
 				);
 
-				value = attributes.join("").replace(",", "");
+				value = attributes.join('').replace(',', '');
 				rowString += `${value}`;
 			} else {
 				rowString += `${firstKey}=${value}`;
@@ -55,61 +56,61 @@ const parseParams = (params: any): any => {
 
 			if (firstIndex !== optionalLength - 1) rowString = `${rowString}&`;
 			return rowString;
-		}
+		},
 	);
 
-	return optionalData.join("").replace(",", "");
+	return optionalData.join('').replace(',', '');
 };
 
 export class Mollie implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: "Mollie",
-		name: "mollie",
-		icon: "file:mollie.png",
-		group: ["transform"],
+		displayName: 'Mollie',
+		name: 'mollie',
+		icon: 'file:mollie.png',
+		group: ['transform'],
 		version: 1,
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
 		description: `Consume Mollie API (v.${version})`,
 		defaults: {
-			name: "Mollie",
-			color: "#772244",
+			name: 'Mollie',
+			color: '#772244',
 		},
-		inputs: ["main"],
-		outputs: ["main"],
+		inputs: ['main'],
+		outputs: ['main'],
 		credentials: [
 			{
-				name: "mollieApi",
+				name: 'mollieApi',
 				required: true,
 			},
 		],
 		properties: [
 			{
-				displayName: "Live Api Key",
-				name: "isLiveKey",
+				displayName: 'Live Api Key',
+				name: 'isLiveKey',
 				required: true,
-				type: "boolean",
+				type: 'boolean',
 				default: true,
 			},
 			{
-				displayName: "Resource",
-				name: "resource",
+				displayName: 'Resource',
+				name: 'resource',
 				required: true,
-				type: "options",
+				type: 'options',
 				options: [
 					{
-						name: "Payments",
-						value: "payments",
+						name: 'Payments',
+						value: 'payments',
 					},
 					{
-						name: "Payment links",
-						value: "paymentLinks",
+						name: 'Payment links',
+						value: 'paymentLinks',
 					},
 					{
-						name: "Methods",
-						value: "methods",
+						name: 'Methods',
+						value: 'methods',
 					},
 				],
-				default: "payments",
+				default: 'payments',
 			},
 			...paymentsOperations,
 			...paymentsFields,
@@ -125,100 +126,100 @@ export class Mollie implements INodeType {
 		let responseData;
 		const body: IDataObject = {};
 		const qs: IDataObject = {};
-		let method = "";
-		let endpoint = "";
+		let method = '';
+		let endpoint = '';
 		const returnData: IDataObject[] = [];
 
-		const isLiveKey = this.getNodeParameter("isLiveKey", 0) as boolean;
-		const resource = this.getNodeParameter("resource", 0) as string;
-		const operation = this.getNodeParameter("operation", 0) as string;
+		const isLiveKey = this.getNodeParameter('isLiveKey', 0) as boolean;
+		const resource = this.getNodeParameter('resource', 0) as string;
+		const operation = this.getNodeParameter('operation', 0) as string;
 
 		const optionalParameters: any = this.getNodeParameter(
-			"optionalParameters",
-			0
+			'optionalParameters',
+			0,
 		) as string;
 
 		for (let i = 0; i < items.length; i++) {
 			try {
 				switch (resource) {
-					case "payments":
-						const paymentUrl = "/payments";
+					case 'payments':
+						const paymentUrl = '/payments';
 						switch (operation) {
-							case "create":
+							case 'create':
 								// ----------------------------------
 								//        payments:create
 								// ----------------------------------
 								endpoint = paymentUrl;
-								method = "POST";
+								method = 'POST';
 								body.metadata = {
-									order_id: this.getNodeParameter("orderId", i) as string,
+									order_id: this.getNodeParameter('orderId', i) as string,
 								};
 								body.amount = {
-									currency: this.getNodeParameter("currency", i) as string,
+									currency: this.getNodeParameter('currency', i) as string,
 									value: (
-										this.getNodeParameter("value", i) as string
+										this.getNodeParameter('value', i) as string
 									).toString(), // Ensure sending a string value
 								};
 								body.description = this.getNodeParameter(
-									"description",
-									i
+									'description',
+									i,
 								) as string;
 								body.redirectUrl = this.getNodeParameter(
-									"redirectUrl",
-									i
+									'redirectUrl',
+									i,
 								) as string;
 								Object.assign(
 									body,
-									this.getNodeParameter("additionalFields", i) as IDataObject
+									this.getNodeParameter('additionalFields', i) as IDataObject,
 								);
 								break;
 
-							case "delete":
+							case 'delete':
 								// ----------------------------------
 								//        payments:delete
 								// ----------------------------------
 								endpoint = (paymentUrl +
-									"/" +
-									this.getNodeParameter("id", i)) as string;
-								method = "DELETE";
+									'/' +
+									this.getNodeParameter('id', i)) as string;
+								method = 'DELETE';
 								break;
 
-							case "get":
+							case 'get':
 								// ----------------------------------
 								//        payments:get
 								// ----------------------------------
 								endpoint = (paymentUrl +
-									"/" +
-									this.getNodeParameter("id", i)) as string;
-								method = "GET";
+									'/' +
+									this.getNodeParameter('id', i)) as string;
+								method = 'GET';
 								break;
 
-							case "list":
+							case 'list':
 								// ----------------------------------
 								//        payments:list
 								// ----------------------------------
 								endpoint = paymentUrl;
-								method = "GET";
+								method = 'GET';
 								Object.assign(
 									qs,
 									this.getNodeParameter(
-										"additionalParameters",
-										i
-									) as IDataObject
+										'additionalParameters',
+										i,
+									) as IDataObject,
 								);
 								break;
 
-							case "update":
+							case 'update':
 								// ----------------------------------
 								//        payments:update
 								// ----------------------------------
 								endpoint = (paymentUrl +
-									"/" +
-									this.getNodeParameter("id", i)) as string;
-								method = "PATCH";
+									'/' +
+									this.getNodeParameter('id', i)) as string;
+								method = 'PATCH';
 								Object.assign(
 									body,
-									this.getNodeParameter("additionalFields", i) as IDataObject
+									this.getNodeParameter('additionalFields', i) as IDataObject,
 								);
 								break;
 
@@ -227,53 +228,53 @@ export class Mollie implements INodeType {
 						}
 						break;
 
-					case "paymentLinks":
-						const paymentLinksUrl = "/payment-links";
+					case 'paymentLinks':
+						const paymentLinksUrl = '/payment-links';
 						switch (operation) {
-							case "create":
+							case 'create':
 								// ----------------------------------
 								//        paymentLinks:create
 								// ----------------------------------
 								endpoint = paymentLinksUrl;
-								method = "POST";
+								method = 'POST';
 								body.amount = {
-									currency: this.getNodeParameter("currency", i) as string,
+									currency: this.getNodeParameter('currency', i) as string,
 									value: (
-										this.getNodeParameter("value", i) as string
+										this.getNodeParameter('value', i) as string
 									).toString(), // Ensure sending a string value
 								};
 								body.description = this.getNodeParameter(
-									"description",
-									i
+									'description',
+									i,
 								) as string;
 								Object.assign(
 									body,
-									this.getNodeParameter("additionalFields", i) as IDataObject
+									this.getNodeParameter('additionalFields', i) as IDataObject,
 								);
 								break;
 
-							case "get":
+							case 'get':
 								// ----------------------------------
 								//        paymentLinks:get
 								// ----------------------------------
 								endpoint = (paymentLinksUrl +
-									"/" +
-									this.getNodeParameter("id", i)) as string;
-								method = "GET";
+									'/' +
+									this.getNodeParameter('id', i)) as string;
+								method = 'GET';
 								break;
 
-							case "list":
+							case 'list':
 								// ----------------------------------
 								//        paymentLinks:list
 								// ----------------------------------
 								endpoint = paymentLinksUrl;
-								method = "GET";
+								method = 'GET';
 								Object.assign(
 									qs,
 									this.getNodeParameter(
-										"additionalParameters",
-										i
-									) as IDataObject
+										'additionalParameters',
+										i,
+									) as IDataObject,
 								);
 
 								break;
@@ -284,37 +285,37 @@ export class Mollie implements INodeType {
 
 						break;
 
-					case "methods":
-						const methodsUri = "/methods";
+					case 'methods':
+						const methodsUri = '/methods';
 						switch (operation) {
-							case "list":
+							case 'list':
 								// ----------------------------------
 								//        methods:list
 								// ----------------------------------
 
 								endpoint = `${methodsUri}${parseParams(optionalParameters)}`;
-								method = "GET";
+								method = 'GET';
 								break;
 
-							case "listAll":
+							case 'listAll':
 								// ----------------------------------
 								//        methods:listAll
 								// ----------------------------------
 								endpoint = `${methodsUri}/all${parseParams(
-									optionalParameters
+									optionalParameters,
 								)}`;
-								method = "GET";
+								method = 'GET';
 								break;
 
-							case "get":
+							case 'get':
 								// ----------------------------------
 								//        methods:get
 								// ----------------------------------
 								endpoint = `${methodsUri}/${this.getNodeParameter(
-									"id",
-									i
+									'id',
+									i,
 								)}${parseParams(optionalParameters)}`;
-								method = "GET";
+								method = 'GET';
 								break;
 
 							default:
@@ -332,24 +333,24 @@ export class Mollie implements INodeType {
 					endpoint,
 					qs,
 					body,
-					isLiveKey
+					isLiveKey,
 				);
 				responseData = JSON.parse(responseData);
 
-				if (responseData.name === "Error") {
+				if (responseData.name === 'Error') {
 					throw new NodeApiError(this.getNode(), responseData);
 				}
 
-				if (operation === "list" || operation === "listAll") {
+				if (operation === 'list' || operation === 'listAll') {
 					switch (resource) {
-						case "payments":
-							responseData = simplify(responseData, "payments");
+						case 'payments':
+							responseData = simplify(responseData, 'payments');
 							break;
-						case "paymentLinks":
-							responseData = simplify(responseData, "payment_links");
+						case 'paymentLinks':
+							responseData = simplify(responseData, 'payment_links');
 							break;
-						case "methods":
-							responseData = simplify(responseData, "methods");
+						case 'methods':
+							responseData = simplify(responseData, 'methods');
 							break;
 
 						default:
