@@ -22,6 +22,8 @@ import {
 	paymentLinksOperations,
 	paymentsFields,
 	paymentsOperations,
+	refundsFields,
+	refundsOperations
 } from './descriptions';
 
 import { version } from '../version';
@@ -73,6 +75,10 @@ export class Mollie implements INodeType {
 						name: 'Methods',
 						value: 'methods',
 					},
+					{
+						name: 'Refunds',
+						value: 'refunds',
+					},
 				],
 				default: 'payments',
 			},
@@ -82,6 +88,8 @@ export class Mollie implements INodeType {
 			...paymentLinksFields,
 			...methodsOperations,
 			...methodsFields,
+			...refundsOperations,
+			...refundsFields,
 		],
 
 	};
@@ -235,6 +243,61 @@ export class Mollie implements INodeType {
 						}
 						break;
 
+					case 'refunds':
+						const refundsUrl = '/payments';
+						switch (operation) {
+							case 'create':
+								// ----------------------------------
+								//        refunds:create
+								// ----------------------------------
+								endpoint = refundsUrl + '/' + this.getNodeParameter('paymentID', i) as string + '/refunds';
+								method = 'POST';
+								body.amount = {
+									currency: this.getNodeParameter('currency', i) as string,
+									value: this.getNodeParameter('value', i) as string,
+								};
+								body.description = this.getNodeParameter('description', i) as string;
+								body.metadata = this.getNodeParameter('metadata', i) as string;
+								Object.assign(body, this.getNodeParameter('additionalFields', i) as IDataObject);
+								break;
+
+							case 'listPayment':
+								// ----------------------------------
+								//        refunds:listPayment
+								// ----------------------------------
+								endpoint = refundsUrl + '/' + this.getNodeParameter('paymentID', i) as string + '/refunds';
+								method = 'GET';
+								break;
+
+							case 'list':
+								// ----------------------------------
+								//        refunds:list
+								// ----------------------------------
+								endpoint = '/refunds';
+								method = 'GET';
+								break;
+
+							case 'get':
+								// ----------------------------------
+								//        refunds:get
+								// ----------------------------------
+								endpoint = refundsUrl + '/' + this.getNodeParameter('paymentID', i) as string + '/refunds/' + this.getNodeParameter('refundID', i) as string ;
+								method = 'GET';
+								break;
+
+							case 'cancel':
+								// ----------------------------------
+								//        refunds:cancel
+								// ----------------------------------
+								endpoint = refundsUrl + '/' + this.getNodeParameter('paymentID', i) as string + '/refunds/' + this.getNodeParameter('refundID', i) as string ;
+								method = 'DELETE';
+								break;
+
+							default:
+								break;
+						}
+						break;
+
 					default:
 						break;
 				}
@@ -246,7 +309,7 @@ export class Mollie implements INodeType {
 					throw new NodeApiError(this.getNode(), responseData);
 				}
 
-				if (operation === 'list' || operation === 'listAll') {
+				if (operation === 'list' || operation === 'listAll' || operation === 'listPayment') {
 					switch (resource) {
 						case 'payments':
 							responseData = simplify(responseData, 'payments');
@@ -256,6 +319,9 @@ export class Mollie implements INodeType {
 							break;
 						case 'methods':
 							responseData = simplify(responseData, 'methods');
+							break;
+						case 'refunds':
+							responseData = simplify(responseData, 'refunds');
 							break;
 
 						default:
