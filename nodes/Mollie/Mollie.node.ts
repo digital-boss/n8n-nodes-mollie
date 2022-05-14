@@ -22,6 +22,8 @@ import {
 	paymentLinksOperations,
 	paymentsFields,
 	paymentsOperations,
+	refundsOperations,
+	refundsFields,
 } from './descriptions';
 
 import { version } from '../version';
@@ -73,6 +75,10 @@ export class Mollie implements INodeType {
 						name: 'Methods',
 						value: 'methods',
 					},
+					{
+						name: 'Refunds',
+						value: 'refunds',
+					},
 				],
 				default: 'payments',
 			},
@@ -82,6 +88,8 @@ export class Mollie implements INodeType {
 			...paymentLinksFields,
 			...methodsOperations,
 			...methodsFields,
+			...refundsOperations,
+			...refundsFields,
 		],
 
 	};
@@ -234,6 +242,97 @@ export class Mollie implements INodeType {
 								break;
 						}
 						break;
+
+						case 'refunds':						
+							switch (operation) {
+								case 'createPayment':
+									// ----------------------------------
+									//        refunds:createPayment
+									// ----------------------------------
+									endpoint = '/payments/' + this.getNodeParameter('id', i) as string + '/refunds';
+									method = 'POST';
+									body.amount = {
+										currency: this.getNodeParameter('currency', i) as string,
+										value: (this.getNodeParameter('value', i) as string).toString(), // Ensure sending a string value
+									};
+									Object.assign(body, this.getNodeParameter('additionalFields', i) as IDataObject);
+									break;
+
+								case 'createOrder':
+									// ----------------------------------
+									//        refunds:createOrder
+									// ----------------------------------
+									endpoint = '/orders/' + this.getNodeParameter('orderId', i) as string + '/refunds';
+									method = 'POST';
+
+									const orderLines = this.getNodeParameter('orderLines', i) as {
+										lines: IDataObject[],
+									};
+									if (Object.entries(orderLines).length && orderLines.lines !== undefined) {
+										body.lines = orderLines.lines.map(
+											x => {
+												const line = {
+													id: x.id as string
+												} as any;
+												if(x.quantity) {
+													line.quantity = x.quantity as number;
+												}
+												return line;
+											}
+										);
+									} else {
+										body.lines = [];
+									}
+									Object.assign(body, this.getNodeParameter('additionalFields', i) as IDataObject);
+									break;
+	
+								case 'deletePayment':
+									// ----------------------------------
+									//        payments:deletePayment
+									// ----------------------------------
+									endpoint = '/payments/' + this.getNodeParameter('paymentId', i) as string + '/refunds/' + this.getNodeParameter('id', i) as string;
+									method = 'DELETE';
+									break;
+	
+								case 'getPayment':
+									// ----------------------------------
+									//        payments:getPayment
+									// ----------------------------------
+									endpoint = '/payments/' + this.getNodeParameter('paymentId', i) as string + '/refunds/' + this.getNodeParameter('id', i) as string;
+									method = 'GET';
+									break;
+	
+								case 'list':
+									// ----------------------------------
+									//        payments:list
+									// ----------------------------------
+									endpoint = '/refunds';
+									method = 'GET';
+									Object.assign(qs, this.getNodeParameter('additionalParameters', i) as IDataObject);
+									break;
+	
+								case 'listPayment':
+									// ----------------------------------
+									//        payments:listPayment
+									// ----------------------------------
+									endpoint = '/payments/' + this.getNodeParameter('paymentId', i) as string + '/refunds';
+									method = 'GET';
+									Object.assign(qs, this.getNodeParameter('additionalParameters', i) as IDataObject);
+									break;
+
+								case 'listOrder':
+									// ----------------------------------
+									//        payments:listOrder
+									// ----------------------------------
+									endpoint = '/orders/' + this.getNodeParameter('orderId', i) as string + '/refunds';
+									method = 'GET';
+									Object.assign(qs, this.getNodeParameter('additionalParameters', i) as IDataObject);
+									break;
+	
+								default:
+									break;
+							}
+							break;
 
 					default:
 						break;
