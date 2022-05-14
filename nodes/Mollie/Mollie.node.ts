@@ -247,7 +247,7 @@ export class Mollie implements INodeType {
 							switch (operation) {
 								case 'createByPayment':
 									// ----------------------------------
-									//        refunds:createPayment
+									//        refunds:createByPayment
 									// ----------------------------------
 									endpoint = '/payments/' + this.getNodeParameter('id', i) as string + '/refunds';
 									method = 'POST';
@@ -260,7 +260,7 @@ export class Mollie implements INodeType {
 
 								case 'createByOrder':
 									// ----------------------------------
-									//        refunds:createOrder
+									//        refunds:createByOrder
 									// ----------------------------------
 									endpoint = '/orders/' + this.getNodeParameter('orderId', i) as string + '/refunds';
 									method = 'POST';
@@ -288,7 +288,7 @@ export class Mollie implements INodeType {
 	
 								case 'deleteByPayment':
 									// ----------------------------------
-									//        payments:deletePayment
+									//        payments:deleteByPayment
 									// ----------------------------------
 									endpoint = '/payments/' + this.getNodeParameter('paymentId', i) as string + '/refunds/' + this.getNodeParameter('id', i) as string;
 									method = 'DELETE';
@@ -296,7 +296,7 @@ export class Mollie implements INodeType {
 	
 								case 'getByPayment':
 									// ----------------------------------
-									//        payments:getPayment
+									//        payments:getByPayment
 									// ----------------------------------
 									endpoint = '/payments/' + this.getNodeParameter('paymentId', i) as string + '/refunds/' + this.getNodeParameter('id', i) as string;
 									method = 'GET';
@@ -313,7 +313,7 @@ export class Mollie implements INodeType {
 	
 								case 'listByPayment':
 									// ----------------------------------
-									//        payments:listPayment
+									//        payments:listByPayment
 									// ----------------------------------
 									endpoint = '/payments/' + this.getNodeParameter('paymentId', i) as string + '/refunds';
 									method = 'GET';
@@ -322,7 +322,7 @@ export class Mollie implements INodeType {
 
 								case 'listByOrder':
 									// ----------------------------------
-									//        payments:listOrder
+									//        payments:listByOrder
 									// ----------------------------------
 									endpoint = '/orders/' + this.getNodeParameter('orderId', i) as string + '/refunds';
 									method = 'GET';
