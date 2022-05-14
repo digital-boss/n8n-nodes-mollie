@@ -18,22 +18,22 @@ export const refundsOperations: INodeProperties[] = [
 		options: [
 			{
 				name: 'Create Payment Refund',
-				value: 'createPayment',
+				value: 'createByPayment',
 				description: 'Create a refund for a payment.',
 			},
             {
 				name: 'Create Order Refund',
-				value: 'createOrder',
+				value: 'createByOrder',
 				description: 'Create a refund for an order.',
 			},
 			{
 				name: 'Delete Payment Refund',
-				value: 'deletePayment',
+				value: 'deleteByPayment',
 				description: 'Delete a specific payment refund.',
 			},
 			{
 				name: 'Get Payment Refund',
-				value: 'getPayment',
+				value: 'getByPayment',
 				description: 'Get a specific payment refund.',
 			},
 			{
@@ -43,12 +43,12 @@ export const refundsOperations: INodeProperties[] = [
 			},
             {
 				name: 'List Payment Refunds',
-				value: 'listPayment',
+				value: 'listByPayment',
 				description: 'Get data of all payment refunds.',
 			},
             {
 				name: 'List Order Refunds',
-				value: 'listOrder',
+				value: 'listByOrder',
 				description: 'Get data of all order refunds.',
 			},
 		],
@@ -57,7 +57,7 @@ export const refundsOperations: INodeProperties[] = [
 
 export const refundsFields: INodeProperties[] = [
 	/*-------------------------------------------------------------------------- */
-	/*                                refunds:createPayment                      */
+	/*                                refunds:createByPayment                      */
 	/* ------------------------------------------------------------------------- */
 	{
 		displayName: 'Payment ID',
@@ -68,7 +68,7 @@ export const refundsFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['refunds'],
-				operation: ['createPayment'],
+				operation: ['createByPayment'],
 			},
 		},
 	},
@@ -81,7 +81,7 @@ export const refundsFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['refunds'],
-				operation: ['createPayment'],
+				operation: ['createByPayment'],
 			},
 		},
 	},
@@ -95,7 +95,7 @@ export const refundsFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['refunds'],
-				operation: ['createPayment'],
+				operation: ['createByPayment'],
 			},
 		},
 	},
@@ -108,7 +108,7 @@ export const refundsFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['refunds'],
-				operation: ['createPayment'],
+				operation: ['createByPayment'],
 			},
 		},
 		options: [
@@ -122,7 +122,7 @@ export const refundsFields: INodeProperties[] = [
 	},
 
     /*-------------------------------------------------------------------------- */
-	/*                                refunds:createOrder                        */
+	/*                                refunds:createByOrder                        */
 	/* ------------------------------------------------------------------------- */
 	{
 		displayName: 'Order ID',
@@ -133,7 +133,7 @@ export const refundsFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['refunds'],
-				operation: ['createOrder'],
+				operation: ['createByOrder'],
 			},
 		},
 	},
@@ -149,7 +149,7 @@ export const refundsFields: INodeProperties[] = [
         displayOptions: {
 			show: {
 				resource: ['refunds'],
-				operation: ['createOrder'],
+				operation: ['createByOrder'],
 			},
 		},
 		options: [
@@ -184,7 +184,7 @@ export const refundsFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['refunds'],
-				operation: ['createOrder'],
+				operation: ['createByOrder'],
 			},
 		},
 		options: [
@@ -198,7 +198,7 @@ export const refundsFields: INodeProperties[] = [
 	},
 
 	/*-------------------------------------------------------------------------- */
-	/*                                refunds:deletePayment                       */
+	/*                                refunds:deleteByPayment                       */
 	/* ------------------------------------------------------------------------- */
 	{
 		displayName: 'Refund ID',
@@ -209,7 +209,7 @@ export const refundsFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['refunds'],
-				operation: ['deletePayment'],
+				operation: ['deleteByPayment'],
 			},
 		},
 	},
@@ -222,13 +222,13 @@ export const refundsFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['refunds'],
-				operation: ['deletePayment'],
+				operation: ['deleteByPayment'],
 			},
 		},
 	},
 
 	/*-------------------------------------------------------------------------- */
-	/*                                refunds:getPayment	                     */
+	/*                                refunds:getByPayment	                     */
 	/* ------------------------------------------------------------------------- */
 	{
 		displayName: 'Refund ID',
@@ -239,7 +239,7 @@ export const refundsFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['refunds'],
-				operation: ['getPayment'],
+				operation: ['getByPayment'],
 			},
 		},
 	},
@@ -252,7 +252,7 @@ export const refundsFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['refunds'],
-				operation: ['getPayment'],
+				operation: ['getByPayment'],
 			},
 		},
 	},
@@ -289,7 +289,7 @@ export const refundsFields: INodeProperties[] = [
 	},
 
     /*-------------------------------------------------------------------------- */
-	/*                                refunds:listPayment                        */
+	/*                                refunds:listByPayment                        */
 	/* ------------------------------------------------------------------------- */
 	{
 		displayName: 'Payment ID',
@@ -300,7 +300,7 @@ export const refundsFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['refunds'],
-				operation: ['listPayment'],
+				operation: ['listByPayment'],
 			},
 		},
 	},
@@ -313,7 +313,7 @@ export const refundsFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['refunds'],
-				operation: ['listPayment'],
+				operation: ['listByPayment'],
 			},
 		},
 		options: [
@@ -333,7 +333,7 @@ export const refundsFields: INodeProperties[] = [
 	},
 
     /*-------------------------------------------------------------------------- */
-	/*                                refunds:listOrder                          */
+	/*                                refunds:listByOrder                          */
 	/* ------------------------------------------------------------------------- */
 	{
 		displayName: 'Order ID',
@@ -344,7 +344,7 @@ export const refundsFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['refunds'],
-				operation: ['listOrder'],
+				operation: ['listByOrder'],
 			},
 		},
 	},
@@ -357,7 +357,7 @@ export const refundsFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['refunds'],
-				operation: ['listOrder'],
+				operation: ['listByOrder'],
 			},
 		},
 		options: [

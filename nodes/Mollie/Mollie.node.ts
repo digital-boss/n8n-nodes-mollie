@@ -245,7 +245,7 @@ export class Mollie implements INodeType {
 
 						case 'refunds':						
 							switch (operation) {
-								case 'createPayment':
+								case 'createByPayment':
 									// ----------------------------------
 									//        refunds:createPayment
 									// ----------------------------------
@@ -258,7 +258,7 @@ export class Mollie implements INodeType {
 									Object.assign(body, this.getNodeParameter('additionalFields', i) as IDataObject);
 									break;
 
-								case 'createOrder':
+								case 'createByOrder':
 									// ----------------------------------
 									//        refunds:createOrder
 									// ----------------------------------
@@ -286,7 +286,7 @@ export class Mollie implements INodeType {
 									Object.assign(body, this.getNodeParameter('additionalFields', i) as IDataObject);
 									break;
 	
-								case 'deletePayment':
+								case 'deleteByPayment':
 									// ----------------------------------
 									//        payments:deletePayment
 									// ----------------------------------
@@ -294,7 +294,7 @@ export class Mollie implements INodeType {
 									method = 'DELETE';
 									break;
 	
-								case 'getPayment':
+								case 'getByPayment':
 									// ----------------------------------
 									//        payments:getPayment
 									// ----------------------------------
@@ -311,7 +311,7 @@ export class Mollie implements INodeType {
 									Object.assign(qs, this.getNodeParameter('additionalParameters', i) as IDataObject);
 									break;
 	
-								case 'listPayment':
+								case 'listByPayment':
 									// ----------------------------------
 									//        payments:listPayment
 									// ----------------------------------
@@ -320,7 +320,7 @@ export class Mollie implements INodeType {
 									Object.assign(qs, this.getNodeParameter('additionalParameters', i) as IDataObject);
 									break;
 
-								case 'listOrder':
+								case 'listByOrder':
 									// ----------------------------------
 									//        payments:listOrder
 									// ----------------------------------
