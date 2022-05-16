@@ -130,8 +130,8 @@ export const methodsFields: INodeProperties[] = [
 	/*                                methods:list                             	 */
 	/* ------------------------------------------------------------------------- */
 	{
-		displayName: 'Optional parameters',
-		name: 'optionalParameters',
+		displayName: 'Additional Parameters',
+		name: 'additionalParameters',
 		type: 'collection',
 		placeholder: 'Add Options',
 		default: {},
@@ -170,9 +170,16 @@ export const methodsFields: INodeProperties[] = [
 				options: localOptions,
 			},
 			{
-				displayName: 'Amount',
-				name: 'amount',
-				type: 'json',
+				displayName: 'Currency',
+				name: 'currency',
+				type: 'string',
+				default: '',
+			},
+			{
+				displayName: 'Value',
+				name: 'value',
+				description: 'Make sure to send 2 decimals and omit the thousands separator, e.g. \'currency\':\'EUR\', \'value\':\'1000.00\' if you meant €1000.00.',
+				type: 'string',
 				default: '',
 			},
 			{
@@ -198,8 +205,8 @@ export const methodsFields: INodeProperties[] = [
 				default: '',
 			},
 			{
-				displayName: 'Include Wallet',
-				name: 'includeWallet',
+				displayName: 'Include Wallets',
+				name: 'includeWallets',
 				type: 'options',
 				default: '',
 				options: [
@@ -211,7 +218,7 @@ export const methodsFields: INodeProperties[] = [
 			},
 			{
 				displayName: 'Order line category',
-				name: 'orderLineCategory',
+				name: 'orderLineCategories',
 				type: 'string',
 				default: '',
 			},
@@ -222,8 +229,8 @@ export const methodsFields: INodeProperties[] = [
 	/*                                methods:listAll                            */
 	/* ------------------------------------------------------------------------- */
 	{
-		displayName: 'Optional parameters',
-		name: 'optionalParameters',
+		displayName: 'Additional Parameters',
+		name: 'additionalParameters',
 		type: 'collection',
 		placeholder: 'Add Options',
 		default: {},
@@ -242,9 +249,16 @@ export const methodsFields: INodeProperties[] = [
 				options: localOptions,
 			},
 			{
-				displayName: 'Amount',
-				name: 'amount',
-				type: 'json',
+				displayName: 'Currency',
+				name: 'currency',
+				type: 'string',
+				default: '',
+			},
+			{
+				displayName: 'Value',
+				name: 'value',
+				description: 'Make sure to send 2 decimals and omit the thousands separator, e.g. \'currency\':\'EUR\', \'value\':\'1000.00\' if you meant €1000.00.',
+				type: 'string',
 				default: '',
 			},
 		],
@@ -266,8 +280,8 @@ export const methodsFields: INodeProperties[] = [
 		},
 	},
 	{
-		displayName: 'Optional parameters',
-		name: 'optionalParameters',
+		displayName: 'Additional Parameters',
+		name: 'additionalParameters',
 		type: 'collection',
 		placeholder: 'Add Options',
 		default: {},

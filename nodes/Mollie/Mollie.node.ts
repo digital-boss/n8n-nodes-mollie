@@ -21,47 +21,6 @@ import {
 
 import { version } from '../version';
 
-const parseParams = (params: any): any => {
-	const optionalLength = Object.keys(params).length;
-	const optionalData = Object.keys(params).map(
-		(firstKey: string, firstIndex: number) => {
-			let rowString = '';
-			if (firstIndex === 0) rowString = '?';
-
-			let value = params[firstKey];
-			if (
-				value.slice(0, 1) === '{' &&
-				value.slice(value.length - 1, value.length) === '}'
-			) {
-				const parsedValue = JSON.parse(value);
-				const parsedValueLength = Object.keys(parsedValue).length;
-				const attributes = Object.keys(parsedValue).map(
-					(keySecond: string, secondIndex: number) => {
-						let attributeString = '';
-
-						attributeString += `${firstKey}[${keySecond}]=${parsedValue[keySecond]}`;
-						if (secondIndex !== parsedValueLength - 1) {
-							attributeString = `${attributeString}&`;
-						}
-
-						return attributeString;
-					},
-				);
-
-				value = attributes.join('').replace(',', '');
-				rowString += `${value}`;
-			} else {
-				rowString += `${firstKey}=${value}`;
-			}
-
-			if (firstIndex !== optionalLength - 1) rowString = `${rowString}&`;
-			return rowString;
-		},
-	);
-
-	return optionalData.join('').replace(',', '');
-};
-
 export class Mollie implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Mollie',
@@ -134,8 +93,8 @@ export class Mollie implements INodeType {
 		const resource = this.getNodeParameter('resource', 0) as string;
 		const operation = this.getNodeParameter('operation', 0) as string;
 
-		const optionalParameters: any = this.getNodeParameter(
-			'optionalParameters',
+		const additionalParameters: any = this.getNodeParameter(
+			'additionalParameters',
 			0,
 		) as string;
 
@@ -293,29 +252,52 @@ export class Mollie implements INodeType {
 								//        methods:list
 								// ----------------------------------
 
-								endpoint = `${methodsUri}${parseParams(optionalParameters)}`;
+								endpoint = methodsUri;
 								method = 'GET';
+
+								Object.assign(
+									qs,
+									{
+										...additionalParameters,
+										amount: {
+											currency: additionalParameters.currency,
+											value: additionalParameters.value,
+										},
+									},
+								);
+
+								delete qs.currency;
+								delete qs.value;
 								break;
 
 							case 'listAll':
 								// ----------------------------------
 								//        methods:listAll
 								// ----------------------------------
-								endpoint = `${methodsUri}/all${parseParams(
-									optionalParameters,
-								)}`;
+								endpoint = `${methodsUri}/all`;
 								method = 'GET';
+								Object.assign(
+									qs,
+									{
+										...additionalParameters,
+										amount: {
+											currency: additionalParameters.currency,
+											value: additionalParameters.value,
+										},
+									},
+								);
+
+								delete qs.currency;
+								delete qs.value;
 								break;
 
 							case 'get':
 								// ----------------------------------
 								//        methods:get
 								// ----------------------------------
-								endpoint = `${methodsUri}/${this.getNodeParameter(
-									'id',
-									i,
-								)}${parseParams(optionalParameters)}`;
+								endpoint = `${methodsUri}/${this.getNodeParameter('id', i)}`;
 								method = 'GET';
+								Object.assign(qs, additionalParameters);
 								break;
 
 							default:
