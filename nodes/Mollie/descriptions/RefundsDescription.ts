@@ -88,29 +88,31 @@ export const refundsFields: INodeProperties[] = [
 		},
 	},
 	{
-		displayName: 'Description',
-		name: 'description',
-		required: true,
-		type: 'string',
-		default: '',
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
 		displayOptions: {
 			show: {
 				resource: ['refunds'],
 				operation: ['create'],
 			},
 		},
-	},
-	{
-		displayName: 'Metadata',
-		name: 'metadata',
-		type: 'string',
-		default: '',
-		displayOptions: {
-			show: {
-				resource: ['refunds'],
-				operation: ['create'],
+		options: [
+			{
+				displayName: 'Description',
+				name: 'description',
+				type: 'string',
+				default: '',
 			},
-		},
+			{
+				displayName: 'Metadata',
+				name: 'metadata',
+				type: 'string',
+				default: '',
+			},
+		],
 	},
 	/*-------------------------------------------------------------------------- */
 	/*                                refunds:cancel                            */
@@ -157,13 +159,39 @@ export const refundsFields: INodeProperties[] = [
 			},
 		},
 	},
-
+	{
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['refunds'],
+				operation: ['listPayment'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Form',
+				name: 'form',
+				type: 'string',
+				default: '',
+			},
+			{
+				displayName: 'Limit',
+				name: 'limit',
+				type: 'number',
+				default: 250,
+			},
+		],
+	},
 	/*-------------------------------------------------------------------------- */
 	/*                                refunds:list                              */
 	/* ------------------------------------------------------------------------- */
 	{
-		displayName: 'Additional Parameters',
-		name: 'additionalParameters',
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
 		type: 'collection',
 		placeholder: 'Add Field',
 		default: {},
@@ -174,6 +202,12 @@ export const refundsFields: INodeProperties[] = [
 			},
 		},
 		options: [
+			{
+				displayName: 'Form',
+				name: 'form',
+				type: 'string',
+				default: '',
+			},
 			{
 				displayName: 'Limit',
 				name: 'limit',

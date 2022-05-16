@@ -256,8 +256,7 @@ export class Mollie implements INodeType {
 									currency: this.getNodeParameter('currency', i) as string,
 									value: (this.getNodeParameter('value', i) as string).toString(),
 								};
-								body.description = this.getNodeParameter('description', i) as string;
-								body.metadata = this.getNodeParameter('metadata', i) as string;
+								Object.assign(body, this.getNodeParameter('additionalFields', i) as IDataObject);
 								break;
 
 							case 'listPayment':
@@ -266,6 +265,7 @@ export class Mollie implements INodeType {
 								// ----------------------------------
 								endpoint = refundsUrl + '/' + this.getNodeParameter('paymentID', i) as string + '/refunds';
 								method = 'GET';
+								Object.assign(qs, this.getNodeParameter('additionalFields', i) as IDataObject);
 								break;
 
 							case 'list':
@@ -274,6 +274,7 @@ export class Mollie implements INodeType {
 								// ----------------------------------
 								endpoint = '/refunds';
 								method = 'GET';
+								Object.assign(qs, this.getNodeParameter('additionalFields', i) as IDataObject);
 								break;
 
 							case 'get':
