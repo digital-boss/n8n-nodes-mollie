@@ -1,6 +1,95 @@
-import {
-	INodeProperties,
-} from 'n8n-workflow';
+import { INodeProperties } from 'n8n-workflow';
+
+const localOptions = [
+	{
+		name: 'en_US',
+		value: 'en_US',
+	},
+	{
+		name: 'en_GB',
+		value: 'en_GB',
+	},
+	{
+		name: 'nl_NL',
+		value: 'nl_NL',
+	},
+	{
+		name: 'nl_BE',
+		value: 'nl_BE',
+	},
+	{
+		name: 'fr_FR',
+		value: 'fr_FR',
+	},
+	{
+		name: 'fr_BE',
+		value: 'fr_BE',
+	},
+	{
+		name: 'de_DE',
+		value: 'de_DE',
+	},
+	{
+		name: 'de_AT',
+		value: 'de_AT',
+	},
+	{
+		name: 'de_CH',
+		value: 'de_CH',
+	},
+	{
+		name: 'es_ES',
+		value: 'es_ES',
+	},
+	{
+		name: 'ca_ES',
+		value: 'ca_ES',
+	},
+	{
+		name: 'pt_PT',
+		value: 'pt_PT',
+	},
+	{
+		name: 'it_IT',
+		value: 'it_IT',
+	},
+	{
+		name: 'nb_NO',
+		value: 'nb_NO',
+	},
+	{
+		name: 'sv_SE',
+		value: 'sv_SE',
+	},
+	{
+		name: 'fi_FI',
+		value: 'fi_FI',
+	},
+	{
+		name: 'da_DK',
+		value: 'da_DK',
+	},
+	{
+		name: 'is_IS',
+		value: 'is_IS',
+	},
+	{
+		name: 'hu_HU',
+		value: 'hu_HU',
+	},
+	{
+		name: 'pl_PL',
+		value: 'pl_PL',
+	},
+	{
+		name: 'lv_LV',
+		value: 'lv_LV',
+	},
+	{
+		name: 'lt_LT',
+		value: 'lt_LT',
+	},
+];
 
 export const methodsOperations: INodeProperties[] = [
 	{
@@ -40,11 +129,140 @@ export const methodsFields: INodeProperties[] = [
 	/*-------------------------------------------------------------------------- */
 	/*                                methods:list                             	 */
 	/* ------------------------------------------------------------------------- */
+	{
+		displayName: 'Additional Parameters',
+		name: 'additionalParameters',
+		type: 'collection',
+		placeholder: 'Add Options',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['methods'],
+				operation: ['list'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Sequence type',
+				name: 'sequenceType',
+				type: 'options',
+				default: '',
+				options: [
+					{
+						name: 'Oneoff',
+						value: 'oneoff',
+					},
+					{
+						name: 'First',
+						value: 'first',
+					},
+					{
+						name: 'Recurring',
+						value: 'recurring',
+					},
+				],
+			},
+			{
+				displayName: 'Locale',
+				name: 'locale',
+				type: 'options',
+				default: '',
+				options: localOptions,
+			},
+			{
+				displayName: 'Currency',
+				name: 'currency',
+				type: 'string',
+				default: '',
+			},
+			{
+				displayName: 'Value',
+				name: 'value',
+				description: 'Make sure to send 2 decimals and omit the thousands separator, e.g. \'currency\':\'EUR\', \'value\':\'1000.00\' if you meant €1000.00.',
+				type: 'string',
+				default: '',
+			},
+			{
+				displayName: 'Resource',
+				name: 'resource',
+				type: 'options',
+				default: '',
+				options: [
+					{
+						name: 'Orders',
+						value: 'orders',
+					},
+					{
+						name: 'Payments',
+						value: 'payments',
+					},
+				],
+			},
+			{
+				displayName: 'Billing country',
+				name: 'billingCountry',
+				type: 'string',
+				default: '',
+			},
+			{
+				displayName: 'Include Wallets',
+				name: 'includeWallets',
+				type: 'options',
+				default: '',
+				options: [
+					{
+						name: 'Apple pay',
+						value: 'applepay',
+					},
+				],
+			},
+			{
+				displayName: 'Order line category',
+				name: 'orderLineCategories',
+				type: 'string',
+				default: '',
+			},
+		],
+	},
 
 	/*-------------------------------------------------------------------------- */
 	/*                                methods:listAll                            */
 	/* ------------------------------------------------------------------------- */
-
+	{
+		displayName: 'Additional Parameters',
+		name: 'additionalParameters',
+		type: 'collection',
+		placeholder: 'Add Options',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['methods'],
+				operation: ['listAll'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Locale',
+				name: 'locale',
+				type: 'options',
+				default: '',
+				options: localOptions,
+			},
+			{
+				displayName: 'Currency',
+				name: 'currency',
+				type: 'string',
+				default: '',
+			},
+			{
+				displayName: 'Value',
+				name: 'value',
+				description: 'Make sure to send 2 decimals and omit the thousands separator, e.g. \'currency\':\'EUR\', \'value\':\'1000.00\' if you meant €1000.00.',
+				type: 'string',
+				default: '',
+			},
+		],
+	},
 	/*-------------------------------------------------------------------------- */
 	/*                                methods:get                             	 */
 	/* ------------------------------------------------------------------------- */
@@ -61,5 +279,32 @@ export const methodsFields: INodeProperties[] = [
 			},
 		},
 	},
-
+	{
+		displayName: 'Additional Parameters',
+		name: 'additionalParameters',
+		type: 'collection',
+		placeholder: 'Add Options',
+		default: {},
+		displayOptions: {
+			show: {
+				resource: ['methods'],
+				operation: ['get'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Locale',
+				name: 'locale',
+				type: 'options',
+				default: '',
+				options: localOptions,
+			},
+			{
+				displayName: 'Currency',
+				name: 'currency',
+				type: 'string',
+				default: '',
+			},
+		],
+	},
 ];
