@@ -93,11 +93,6 @@ export class Mollie implements INodeType {
 		const resource = this.getNodeParameter('resource', 0) as string;
 		const operation = this.getNodeParameter('operation', 0) as string;
 
-		const additionalParameters: any = this.getNodeParameter(
-			'additionalParameters',
-			0,
-		) as string;
-
 		for (let i = 0; i < items.length; i++) {
 			try {
 				switch (resource) {
@@ -245,26 +240,29 @@ export class Mollie implements INodeType {
 						break;
 
 					case 'methods':
+						let additionalParameters = null;
 						const methodsUri = '/methods';
+
 						switch (operation) {
 							case 'list':
 								// ----------------------------------
 								//        methods:list
 								// ----------------------------------
+								additionalParameters = this.getNodeParameter(
+									'additionalParameters',
+									i,
+								) as IDataObject;
 
 								endpoint = methodsUri;
 								method = 'GET';
 
-								Object.assign(
-									qs,
-									{
-										...additionalParameters,
-										amount: {
-											currency: additionalParameters.currency,
-											value: additionalParameters.value,
-										},
+								Object.assign(qs, {
+									...additionalParameters,
+									amount: {
+										currency: additionalParameters.currency,
+										value: additionalParameters.value,
 									},
-								);
+								});
 
 								delete qs.currency;
 								delete qs.value;
@@ -274,18 +272,20 @@ export class Mollie implements INodeType {
 								// ----------------------------------
 								//        methods:listAll
 								// ----------------------------------
+								additionalParameters = this.getNodeParameter(
+									'additionalParameters',
+									i,
+								) as IDataObject;
+
 								endpoint = `${methodsUri}/all`;
 								method = 'GET';
-								Object.assign(
-									qs,
-									{
-										...additionalParameters,
-										amount: {
-											currency: additionalParameters.currency,
-											value: additionalParameters.value,
-										},
+								Object.assign(qs, {
+									...additionalParameters,
+									amount: {
+										currency: additionalParameters.currency,
+										value: additionalParameters.value,
 									},
-								);
+								});
 
 								delete qs.currency;
 								delete qs.value;
@@ -297,7 +297,13 @@ export class Mollie implements INodeType {
 								// ----------------------------------
 								endpoint = `${methodsUri}/${this.getNodeParameter('id', i)}`;
 								method = 'GET';
-								Object.assign(qs, additionalParameters);
+								Object.assign(
+									qs,
+									this.getNodeParameter(
+										'additionalParameters',
+										i,
+									) as IDataObject,
+								);
 								break;
 
 							default:
