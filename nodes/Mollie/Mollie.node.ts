@@ -1,14 +1,16 @@
-import { IExecuteFunctions } from 'n8n-core';
-
 import {
 	IDataObject,
+	IExecuteFunctions,
 	INodeExecutionData,
 	INodeType,
 	INodeTypeDescription,
 	NodeApiError,
 } from 'n8n-workflow';
 
-import { mollieApiRequest, simplify } from './GenericFunctions';
+import {
+	mollieApiRequest,
+	simplify
+} from './GenericFunctions';
 
 import {
 	methodsFields,
@@ -315,15 +317,7 @@ export class Mollie implements INodeType {
 						break;
 				}
 
-				responseData = await mollieApiRequest.call(
-					this,
-					method,
-					endpoint,
-					qs,
-					body,
-					isLiveKey,
-				);
-				responseData = JSON.parse(responseData);
+				responseData = await mollieApiRequest.call(this, method, endpoint, qs, body, isLiveKey);
 
 				if (responseData.name === 'Error') {
 					throw new NodeApiError(this.getNode(), responseData);
