@@ -19,6 +19,8 @@ import {
 	paymentLinksOperations,
 	paymentsFields,
 	paymentsOperations,
+	refundsOperations,
+	refundsFields,
 } from './descriptions';
 
 import { version } from '../version';
@@ -70,6 +72,10 @@ export class Mollie implements INodeType {
 						name: 'Methods',
 						value: 'methods',
 					},
+					{
+						name: 'Refunds',
+						value: 'refunds',
+					},
 				],
 				default: 'payments',
 			},
@@ -79,6 +85,8 @@ export class Mollie implements INodeType {
 			...paymentLinksFields,
 			...methodsOperations,
 			...methodsFields,
+			...refundsOperations,
+			...refundsFields,
 		],
 	};
 
@@ -313,17 +321,112 @@ export class Mollie implements INodeType {
 						}
 						break;
 
+						case 'refunds':						
+							switch (operation) {
+								case 'createByPayment':
+									// ----------------------------------
+									//        refunds:createByPayment
+									// ----------------------------------
+									endpoint = '/payments/' + this.getNodeParameter('id', i) as string + '/refunds';
+									method = 'POST';
+									body.amount = {
+										currency: this.getNodeParameter('currency', i) as string,
+										value: (this.getNodeParameter('value', i) as string).toString(), // Ensure sending a string value
+									};
+									Object.assign(body, this.getNodeParameter('additionalFields', i) as IDataObject);
+									break;
+
+								case 'createByOrder':
+									// ----------------------------------
+									//        refunds:createByOrder
+									// ----------------------------------
+									endpoint = '/orders/' + this.getNodeParameter('orderId', i) as string + '/refunds';
+									method = 'POST';
+
+									const orderLines = this.getNodeParameter('orderLines', i) as {
+										lines: IDataObject[],
+									};
+									if (Object.entries(orderLines).length && orderLines.lines !== undefined) {
+										body.lines = orderLines.lines.map(
+											x => {
+												const line = {
+													id: x.id as string
+												} as any;
+												if(x.quantity) {
+													line.quantity = x.quantity as number;
+												}
+												return line;
+											}
+										);
+									} else {
+										body.lines = [];
+									}
+									Object.assign(body, this.getNodeParameter('additionalFields', i) as IDataObject);
+									break;
+	
+								case 'deleteByPayment':
+									// ----------------------------------
+									//        payments:deleteByPayment
+									// ----------------------------------
+									endpoint = '/payments/' + this.getNodeParameter('paymentId', i) as string + '/refunds/' + this.getNodeParameter('id', i) as string;
+									method = 'DELETE';
+									break;
+	
+								case 'getByPayment':
+									// ----------------------------------
+									//        payments:getByPayment
+									// ----------------------------------
+									endpoint = '/payments/' + this.getNodeParameter('paymentId', i) as string + '/refunds/' + this.getNodeParameter('id', i) as string;
+									method = 'GET';
+									break;
+	
+								case 'list':
+									// ----------------------------------
+									//        payments:list
+									// ----------------------------------
+									endpoint = '/refunds';
+									method = 'GET';
+									Object.assign(qs, this.getNodeParameter('additionalParameters', i) as IDataObject);
+									break;
+	
+								case 'listByPayment':
+									// ----------------------------------
+									//        payments:listByPayment
+									// ----------------------------------
+									endpoint = '/payments/' + this.getNodeParameter('paymentId', i) as string + '/refunds';
+									method = 'GET';
+									Object.assign(qs, this.getNodeParameter('additionalParameters', i) as IDataObject);
+									break;
+
+								case 'listByOrder':
+									// ----------------------------------
+									//        payments:listByOrder
+									// ----------------------------------
+									endpoint = '/orders/' + this.getNodeParameter('orderId', i) as string + '/refunds';
+									method = 'GET';
+									Object.assign(qs, this.getNodeParameter('additionalParameters', i) as IDataObject);
+									break;
+	
+								default:
+									break;
+							}
+							break;
+
 					default:
 						break;
 				}
 
 				responseData = await mollieApiRequest.call(this, method, endpoint, qs, body, isLiveKey);
+        
+				if(!responseData) {
+					responseData = { success: true };
+        }
 
-				if (responseData.name === 'Error') {
+				if (responseData?.name === 'Error') {
 					throw new NodeApiError(this.getNode(), responseData);
 				}
 
-				if (operation === 'list' || operation === 'listAll') {
+				if (operation.startsWith('list')) {
 					switch (resource) {
 						case 'payments':
 							responseData = simplify(responseData, 'payments');
@@ -333,6 +436,9 @@ export class Mollie implements INodeType {
 							break;
 						case 'methods':
 							responseData = simplify(responseData, 'methods');
+							break;
+						case 'refunds':
+							responseData = simplify(responseData, 'refunds');
 							break;
 
 						default:
