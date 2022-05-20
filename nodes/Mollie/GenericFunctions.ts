@@ -1,12 +1,13 @@
+import { OptionsWithUri } from 'request';
+
 import {
+	IDataObject,
 	IExecuteFunctions,
 	IExecuteSingleFunctions,
 	IHookFunctions,
 	ILoadOptionsFunctions,
-} from 'n8n-core';
-
-import { OptionsWithUri } from 'request';
-import {IDataObject} from 'n8n-workflow';
+	NodeApiError
+} from 'n8n-workflow';
 
 export async function mollieApiRequest(
 	this:
@@ -24,14 +25,24 @@ export async function mollieApiRequest(
 ): Promise<any> {
 
 	const options: OptionsWithUri = {
+		method,
 		headers: {
+			'Accept': 'application/json',
 			'Content-Type': 'application/json',
 		},
 		qs,
 		body,
-		method,
 		uri: uri || `https://api.mollie.com/v2${endpoint}`,
+		json: true,
 	};
+
+	if (Object.keys(options.qs).length === 0) {
+		delete options.qs;
+	}
+	if (Object.keys(options.body).length === 0) {
+		delete options.body;
+	}
+
 	const credentials = await this.getCredentials('mollieApi');
 	if (isLiveKey && credentials !== undefined && credentials.mollieApiKey) {
 		options.headers!['Authorization'] = 'Bearer ' + credentials.mollieApiKey;
@@ -39,7 +50,12 @@ export async function mollieApiRequest(
 	else if(!isLiveKey && credentials !== undefined && credentials.mollieTestApiKey){
 		options.headers!['Authorization'] = 'Bearer ' + credentials.mollieTestApiKey;
 	}
-	return await this.helpers.request!(options);
+
+	try {
+		return this.helpers.request!(options);
+	} catch (error) {
+		throw new NodeApiError(this.getNode(), error);
+	}
 }
 
 export function simplify(jsonData: IDataObject, propertyName: string): IDataObject {
