@@ -19,8 +19,8 @@ import {
 	paymentLinksOperations,
 	paymentsFields,
 	paymentsOperations,
-	refundsOperations,
 	refundsFields,
+	refundsOperations,
 } from './descriptions';
 
 import { version } from '../version';
@@ -124,27 +124,16 @@ export class Mollie implements INodeType {
 										this.getNodeParameter('value', i) as string
 									).toString(), // Ensure sending a string value
 								};
-								body.description = this.getNodeParameter(
-									'description',
-									i,
-								) as string;
-								body.redirectUrl = this.getNodeParameter(
-									'redirectUrl',
-									i,
-								) as string;
-								Object.assign(
-									body,
-									this.getNodeParameter('additionalFields', i) as IDataObject,
-								);
+								body.description = this.getNodeParameter('description', i) as string;
+								body.redirectUrl = this.getNodeParameter('redirectUrl', i) as string;
+								Object.assign(body, this.getNodeParameter('additionalFields', i) as IDataObject);
 								break;
 
 							case 'delete':
 								// ----------------------------------
 								//        payments:delete
 								// ----------------------------------
-								endpoint = (paymentUrl +
-									'/' +
-									this.getNodeParameter('id', i)) as string;
+								endpoint = (paymentUrl + '/' + this.getNodeParameter('id', i)) as string;
 								method = 'DELETE';
 								break;
 
@@ -152,9 +141,7 @@ export class Mollie implements INodeType {
 								// ----------------------------------
 								//        payments:get
 								// ----------------------------------
-								endpoint = (paymentUrl +
-									'/' +
-									this.getNodeParameter('id', i)) as string;
+								endpoint = (paymentUrl + '/' + this.getNodeParameter('id', i)) as string;
 								method = 'GET';
 								break;
 
@@ -164,27 +151,16 @@ export class Mollie implements INodeType {
 								// ----------------------------------
 								endpoint = paymentUrl;
 								method = 'GET';
-								Object.assign(
-									qs,
-									this.getNodeParameter(
-										'additionalParameters',
-										i,
-									) as IDataObject,
-								);
+								Object.assign(qs, this.getNodeParameter('additionalParameters', i) as IDataObject);
 								break;
 
 							case 'update':
 								// ----------------------------------
 								//        payments:update
 								// ----------------------------------
-								endpoint = (paymentUrl +
-									'/' +
-									this.getNodeParameter('id', i)) as string;
+								endpoint = (paymentUrl + '/' + this.getNodeParameter('id', i)) as string;
 								method = 'PATCH';
-								Object.assign(
-									body,
-									this.getNodeParameter('additionalFields', i) as IDataObject,
-								);
+								Object.assign(body, this.getNodeParameter('additionalFields', i) as IDataObject);
 								break;
 
 							default:
@@ -203,27 +179,17 @@ export class Mollie implements INodeType {
 								method = 'POST';
 								body.amount = {
 									currency: this.getNodeParameter('currency', i) as string,
-									value: (
-										this.getNodeParameter('value', i) as string
-									).toString(), // Ensure sending a string value
+									value: (this.getNodeParameter('value', i) as string).toString(), // Ensure sending a string value
 								};
-								body.description = this.getNodeParameter(
-									'description',
-									i,
-								) as string;
-								Object.assign(
-									body,
-									this.getNodeParameter('additionalFields', i) as IDataObject,
-								);
+								body.description = this.getNodeParameter('description', i) as string;
+								Object.assign(body, this.getNodeParameter('additionalFields', i) as IDataObject);
 								break;
 
 							case 'get':
 								// ----------------------------------
 								//        paymentLinks:get
 								// ----------------------------------
-								endpoint = (paymentLinksUrl +
-									'/' +
-									this.getNodeParameter('id', i)) as string;
+								endpoint = (paymentLinksUrl + '/' + this.getNodeParameter('id', i)) as string;
 								method = 'GET';
 								break;
 
@@ -233,14 +199,7 @@ export class Mollie implements INodeType {
 								// ----------------------------------
 								endpoint = paymentLinksUrl;
 								method = 'GET';
-								Object.assign(
-									qs,
-									this.getNodeParameter(
-										'additionalParameters',
-										i,
-									) as IDataObject,
-								);
-
+								Object.assign(qs, this.getNodeParameter('additionalParameters',i) as IDataObject);
 								break;
 
 							default:
@@ -258,10 +217,7 @@ export class Mollie implements INodeType {
 								// ----------------------------------
 								//        methods:list
 								// ----------------------------------
-								additionalParameters = this.getNodeParameter(
-									'additionalParameters',
-									i,
-								) as IDataObject;
+								additionalParameters = this.getNodeParameter('additionalParameters',i) as IDataObject;
 
 								endpoint = methodsUri;
 								method = 'GET';
@@ -282,10 +238,7 @@ export class Mollie implements INodeType {
 								// ----------------------------------
 								//        methods:listAll
 								// ----------------------------------
-								additionalParameters = this.getNodeParameter(
-									'additionalParameters',
-									i,
-								) as IDataObject;
+								additionalParameters = this.getNodeParameter('additionalParameters', i) as IDataObject;
 
 								endpoint = `${methodsUri}/all`;
 								method = 'GET';
@@ -307,13 +260,7 @@ export class Mollie implements INodeType {
 								// ----------------------------------
 								endpoint = `${methodsUri}/${this.getNodeParameter('id', i)}`;
 								method = 'GET';
-								Object.assign(
-									qs,
-									this.getNodeParameter(
-										'additionalParameters',
-										i,
-									) as IDataObject,
-								);
+								Object.assign(qs, this.getNodeParameter('additionalParameters', i) as IDataObject);
 								break;
 
 							default:
@@ -321,7 +268,7 @@ export class Mollie implements INodeType {
 						}
 						break;
 
-						case 'refunds':						
+						case 'refunds':
 							switch (operation) {
 								case 'createByPayment':
 									// ----------------------------------
@@ -343,27 +290,44 @@ export class Mollie implements INodeType {
 									endpoint = '/orders/' + this.getNodeParameter('orderId', i) as string + '/refunds';
 									method = 'POST';
 
-									const orderLines = this.getNodeParameter('orderLines', i) as {
-										lines: IDataObject[],
-									};
-									if (Object.entries(orderLines).length && orderLines.lines !== undefined) {
-										body.lines = orderLines.lines.map(
-											x => {
-												const line = {
-													id: x.id as string
-												} as any;
-												if(x.quantity) {
-													line.quantity = x.quantity as number;
-												}
-												return line;
-											}
-										);
-									} else {
+									const orderLines = this.getNodeParameter('orderLines', i) as IDataObject;
+
+									if (Object.keys(orderLines).length === 0) {
+										// if no orderLines set lines to empty array
 										body.lines = [];
+									} else {
+										body.lines = (orderLines.lines as IDataObject[]).map(
+											(x: IDataObject)  => {
+												// assign lines.currency to lines.amount.currency
+												if (x.currency) {
+													if (!x.amount) {
+														x.amount = {};
+													}
+													Object.assign(x.amount, { currency: x.currency });
+													delete x.currency;
+												}
+												// assign lines.value to lines.amount.value
+												if (orderLines.value) {
+													if (!x.amount) {
+														x.amount = {};
+													}
+													Object.assign(x.amount, { value: x.value });
+													delete x.value;
+												}
+
+												// remove empty inputs
+												Object.keys(x).forEach(key => {
+													if (x[key] === '') {
+														delete x[key];
+													}
+												});
+											},
+										);
 									}
+
 									Object.assign(body, this.getNodeParameter('additionalFields', i) as IDataObject);
 									break;
-	
+
 								case 'deleteByPayment':
 									// ----------------------------------
 									//        payments:deleteByPayment
@@ -371,7 +335,7 @@ export class Mollie implements INodeType {
 									endpoint = '/payments/' + this.getNodeParameter('paymentId', i) as string + '/refunds/' + this.getNodeParameter('id', i) as string;
 									method = 'DELETE';
 									break;
-	
+
 								case 'getByPayment':
 									// ----------------------------------
 									//        payments:getByPayment
@@ -379,7 +343,7 @@ export class Mollie implements INodeType {
 									endpoint = '/payments/' + this.getNodeParameter('paymentId', i) as string + '/refunds/' + this.getNodeParameter('id', i) as string;
 									method = 'GET';
 									break;
-	
+
 								case 'list':
 									// ----------------------------------
 									//        payments:list
@@ -388,7 +352,7 @@ export class Mollie implements INodeType {
 									method = 'GET';
 									Object.assign(qs, this.getNodeParameter('additionalParameters', i) as IDataObject);
 									break;
-	
+
 								case 'listByPayment':
 									// ----------------------------------
 									//        payments:listByPayment
@@ -406,7 +370,7 @@ export class Mollie implements INodeType {
 									method = 'GET';
 									Object.assign(qs, this.getNodeParameter('additionalParameters', i) as IDataObject);
 									break;
-	
+
 								default:
 									break;
 							}
@@ -417,10 +381,10 @@ export class Mollie implements INodeType {
 				}
 
 				responseData = await mollieApiRequest.call(this, method, endpoint, qs, body, isLiveKey);
-        
+
 				if(!responseData) {
 					responseData = { success: true };
-        }
+				}
 
 				if (responseData?.name === 'Error') {
 					throw new NodeApiError(this.getNode(), responseData);

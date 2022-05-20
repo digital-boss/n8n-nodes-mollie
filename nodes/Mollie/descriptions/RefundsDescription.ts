@@ -21,7 +21,7 @@ export const refundsOperations: INodeProperties[] = [
 				value: 'createByPayment',
 				description: 'Create a refund for a payment.',
 			},
-            {
+			{
 				name: 'Create Order Refund',
 				value: 'createByOrder',
 				description: 'Create a refund for an order.',
@@ -41,12 +41,12 @@ export const refundsOperations: INodeProperties[] = [
 				value: 'list',
 				description: 'Get data of all refunds.',
 			},
-            {
+			{
 				name: 'List Payment Refunds',
 				value: 'listByPayment',
 				description: 'Get data of all payment refunds.',
 			},
-            {
+			{
 				name: 'List Order Refunds',
 				value: 'listByOrder',
 				description: 'Get data of all order refunds.',
@@ -57,7 +57,7 @@ export const refundsOperations: INodeProperties[] = [
 
 export const refundsFields: INodeProperties[] = [
 	/*-------------------------------------------------------------------------- */
-	/*                                refunds:createByPayment                      */
+	/*                                refunds:createByPayment                    */
 	/* ------------------------------------------------------------------------- */
 	{
 		displayName: 'Payment ID',
@@ -113,16 +113,16 @@ export const refundsFields: INodeProperties[] = [
 		},
 		options: [
 			{
-                displayName: 'Description',
-                name: 'description',
-                type: 'string',
-                default: '',
-            },
+				displayName: 'Description',
+				name: 'description',
+				type: 'string',
+				default: '',
+			},
 		],
 	},
 
-    /*-------------------------------------------------------------------------- */
-	/*                                refunds:createByOrder                        */
+	/*-------------------------------------------------------------------------- */
+	/*                                refunds:createByOrder                      */
 	/* ------------------------------------------------------------------------- */
 	{
 		displayName: 'Order ID',
@@ -140,40 +140,54 @@ export const refundsFields: INodeProperties[] = [
 	{
 		displayName: 'Order Lines',
 		name: 'orderLines',
-		required: true,
 		type: 'fixedCollection',
-        typeOptions: {
-            multipleValues: true,
-        },
-        default: {},
-        displayOptions: {
+		typeOptions: {
+			multipleValues: true,
+		},
+		placeholder: 'Add Order Line',
+		default: {},
+		description: 'An array of objects containing the order line details you want to create a refund for. If you send an empty array, the entire order will be refunded.',
+		displayOptions: {
 			show: {
 				resource: ['refunds'],
 				operation: ['createByOrder'],
 			},
 		},
 		options: [
-            {
-                displayName: 'Lines',
+			{
+				displayName: 'Lines',
 				name: 'lines',
-                values: [
-                    {
-                        displayName: 'Order Line ID',
-                        name: 'id',
-                        required: true,
-                        type: 'string',
-                        default: '',
-                    },
-                    {
-                        displayName: 'Quantity',
-                        name: 'quantity',
-                        required: false,
-                        type: 'number',
-                        default: '',
-                    }
-                ]
-            }
-        ],
+					values: [
+					{
+						displayName: 'Order Line ID',
+						name: 'id',
+						required: true,
+						type: 'string',
+						default: '',
+					},
+					{
+						displayName: 'Quantity',
+						name: 'quantity',
+						type: 'number',
+						default: '',
+					},
+					{
+						displayName: 'Currency',
+						name: 'currency',
+						type: 'string',
+						default: '',
+						description: 'The amount that you want to refund. In almost all cases, Mollie can determine the amount automatically. Make sure to send 2 decimals and omit the thousands separator, e.g. "currency":"EUR", "value":"1000.00" if you would want to charge €1000.00.',
+					},
+					{
+						displayName: 'Value',
+						name: 'value',
+						type: 'string',
+						default: '',
+						description: 'The amount that you want to refund. In almost all cases, Mollie can determine the amount automatically. Make sure to send 2 decimals and omit the thousands separator, e.g. "currency":"EUR", "value":"1000.00" if you would want to charge €1000.00.',
+					},
+				],
+			},
+		],
 	},
 	{
 		displayName: 'Additional Fields',
@@ -189,11 +203,17 @@ export const refundsFields: INodeProperties[] = [
 		},
 		options: [
 			{
-                displayName: 'Description',
-                name: 'description',
-                type: 'string',
-                default: '',
-            },
+				displayName: 'Description',
+				name: 'description',
+				type: 'string',
+				default: 'The description of the refund you are creating. This will be shown to the consumer on their card or bank statement when possible. Max. 140 characters.',
+			},
+			{
+				displayName: 'Metadata',
+				name: 'metadata',
+				type: 'string',
+				default: 'Provide any data you like, for example a string or a JSON object. We will save the data alongside the refund. Whenever you fetch the refund with our API, we will also include the metadata. You can use up to approximately 1kB.',
+			},
 		],
 	},
 
@@ -213,7 +233,7 @@ export const refundsFields: INodeProperties[] = [
 			},
 		},
 	},
-    {
+	{
 		displayName: 'Payment ID',
 		name: 'paymentId',
 		required: true,
@@ -243,7 +263,7 @@ export const refundsFields: INodeProperties[] = [
 			},
 		},
 	},
-    {
+	{
 		displayName: 'Payment ID',
 		name: 'paymentId',
 		required: true,
@@ -260,7 +280,7 @@ export const refundsFields: INodeProperties[] = [
 	/*-------------------------------------------------------------------------- */
 	/*                                refunds:list                               */
 	/* ------------------------------------------------------------------------- */
-    {
+	{
 		displayName: 'Additional Parameters',
 		name: 'additionalParameters',
 		type: 'collection',
@@ -273,7 +293,7 @@ export const refundsFields: INodeProperties[] = [
 			},
 		},
 		options: [
-            {
+			{
 				displayName: 'From',
 				name: 'from',
 				type: 'string',
@@ -288,8 +308,8 @@ export const refundsFields: INodeProperties[] = [
 		],
 	},
 
-    /*-------------------------------------------------------------------------- */
-	/*                                refunds:listByPayment                        */
+	/*-------------------------------------------------------------------------- */
+	/*                                refunds:listByPayment                      */
 	/* ------------------------------------------------------------------------- */
 	{
 		displayName: 'Payment ID',
@@ -304,7 +324,7 @@ export const refundsFields: INodeProperties[] = [
 			},
 		},
 	},
-    {
+	{
 		displayName: 'Additional Parameters',
 		name: 'additionalParameters',
 		type: 'collection',
@@ -317,7 +337,7 @@ export const refundsFields: INodeProperties[] = [
 			},
 		},
 		options: [
-            {
+			{
 				displayName: 'From',
 				name: 'from',
 				type: 'string',
@@ -332,8 +352,8 @@ export const refundsFields: INodeProperties[] = [
 		],
 	},
 
-    /*-------------------------------------------------------------------------- */
-	/*                                refunds:listByOrder                          */
+	/*-------------------------------------------------------------------------- */
+	/*                                refunds:listByOrder                        */
 	/* ------------------------------------------------------------------------- */
 	{
 		displayName: 'Order ID',
@@ -348,7 +368,7 @@ export const refundsFields: INodeProperties[] = [
 			},
 		},
 	},
-    {
+	{
 		displayName: 'Additional Parameters',
 		name: 'additionalParameters',
 		type: 'collection',
@@ -361,7 +381,7 @@ export const refundsFields: INodeProperties[] = [
 			},
 		},
 		options: [
-            {
+			{
 				displayName: 'From',
 				name: 'from',
 				type: 'string',

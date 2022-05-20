@@ -68,6 +68,7 @@ export const paymentsFields: INodeProperties[] = [
 		required: true,
 		type: 'string',
 		default: '',
+		description: 'Make sure to send 2 decimals and omit the thousands separator, e.g. "currency":"EUR", "value":"1000.00" if you would want to charge €1000.00.',
 		displayOptions: {
 			show: {
 				resource: ['payments'],
@@ -80,8 +81,8 @@ export const paymentsFields: INodeProperties[] = [
 		name: 'value',
 		required: true,
 		type: 'string',
-		description: 'Make sure to send 2 decimals and omit the thousands separator, e.g. \'currency\':\'EUR\', \'value\':\'1000.00\' if you would want to charge €1000.00.',
 		default: '',
+		description: 'Make sure to send 2 decimals and omit the thousands separator, e.g. "currency":"EUR", "value":"1000.00" if you would want to charge €1000.00.',
 		displayOptions: {
 			show: {
 				resource: ['payments'],
