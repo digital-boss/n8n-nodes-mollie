@@ -21,6 +21,8 @@ import {
 	paymentsOperations,
 	refundsFields,
 	refundsOperations,
+	capturesFields,
+	capturesOperations
 } from './descriptions';
 
 import { version } from '../version';
@@ -76,6 +78,10 @@ export class Mollie implements INodeType {
 						name: 'Refunds',
 						value: 'refunds',
 					},
+					{
+						name: 'Captures',
+						value: 'captures',
+					},
 				],
 				default: 'payments',
 			},
@@ -87,6 +93,8 @@ export class Mollie implements INodeType {
 			...methodsFields,
 			...refundsOperations,
 			...refundsFields,
+			...capturesOperations,
+			...capturesFields,
 		],
 	};
 
@@ -376,6 +384,20 @@ export class Mollie implements INodeType {
 							}
 							break;
 
+					case 'captures':
+						switch (operation) {
+							case 'listByPayment':
+								endpoint = '/payments/' + this.getNodeParameter('paymentId', i) as string + '/captures';
+								method = 'GET';
+								break;
+						
+							case 'get':
+								endpoint = '/payments/' + this.getNodeParameter('paymentId', i) as string + '/captures/' + this.getNodeParameter('id', i) as string;
+								method = 'GET';
+								break;
+						}
+						break;
+					
 					default:
 						break;
 				}
@@ -404,7 +426,9 @@ export class Mollie implements INodeType {
 						case 'refunds':
 							responseData = simplify(responseData, 'refunds');
 							break;
-
+						case 'captures':
+							responseData = simplify(responseData, 'captures');
+							break;
 						default:
 							break;
 					}
