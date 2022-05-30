@@ -5,6 +5,7 @@ import {
 	INodeType,
 	INodeTypeDescription,
 	NodeApiError,
+	NodeOperationError,
 } from 'n8n-workflow';
 
 import {
@@ -13,6 +14,8 @@ import {
 } from './GenericFunctions';
 
 import {
+	capturesFields,
+	capturesOperations,
 	methodsFields,
 	methodsOperations,
 	paymentLinksFields,
@@ -21,8 +24,6 @@ import {
 	paymentsOperations,
 	refundsFields,
 	refundsOperations,
-	capturesFields,
-	capturesOperations
 } from './descriptions';
 
 import { version } from '../version';
@@ -170,8 +171,9 @@ export class Mollie implements INodeType {
 								Object.assign(body, this.getNodeParameter('additionalFields', i) as IDataObject);
 								break;
 
-							default:
-								break;
+							default: {
+								throw new NodeOperationError(this.getNode(), `The operation "${operation}" is not supported for resource "${resource}"!`);
+							}
 						}
 						break;
 
@@ -208,10 +210,10 @@ export class Mollie implements INodeType {
 								Object.assign(qs, this.getNodeParameter('additionalParameters',i) as IDataObject);
 								break;
 
-							default:
-								break;
+							default: {
+								throw new NodeOperationError(this.getNode(), `The operation "${operation}" is not supported for resource "${resource}"!`);
+							}
 						}
-
 						break;
 
 					case 'methods':
@@ -268,8 +270,9 @@ export class Mollie implements INodeType {
 								Object.assign(qs, this.getNodeParameter('additionalParameters', i) as IDataObject);
 								break;
 
-							default:
-								break;
+							default: {
+								throw new NodeOperationError(this.getNode(), `The operation "${operation}" is not supported for resource "${resource}"!`);
+							}
 						}
 						break;
 
@@ -329,7 +332,6 @@ export class Mollie implements INodeType {
 											},
 										);
 									}
-
 									Object.assign(body, this.getNodeParameter('additionalFields', i) as IDataObject);
 									break;
 
@@ -376,8 +378,9 @@ export class Mollie implements INodeType {
 									Object.assign(qs, this.getNodeParameter('additionalParameters', i) as IDataObject);
 									break;
 
-								default:
-									break;
+								default: {
+									throw new NodeOperationError(this.getNode(), `The operation "${operation}" is not supported for resource "${resource}"!`);
+								}
 							}
 							break;
 
@@ -392,11 +395,16 @@ export class Mollie implements INodeType {
 								endpoint = '/payments/' + this.getNodeParameter('paymentId', i) as string + '/captures/' + this.getNodeParameter('id', i) as string;
 								method = 'GET';
 								break;
+
+							default: {
+								throw new NodeOperationError(this.getNode(), `The operation "${operation}" is not supported for resource "${resource}"!`);
+							}
 						}
 						break;
 
-					default:
-						break;
+					default: {
+						throw new NodeOperationError(this.getNode(), `The resource "${resource}" is not supported!`);
+					}
 				}
 
 				responseData = await mollieApiRequest.call(this, method, endpoint, qs, body, isLiveKey);
