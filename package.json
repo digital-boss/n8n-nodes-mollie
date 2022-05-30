@@ -12,6 +12,18 @@
         "type": "git",
         "url": "https://github.com/digital-boss/n8n-nodes-mollie"
     },
+  "keywords": [
+    "n8n",
+    "nodemation",
+    "dnc",
+    "digital north consulting",
+    "digital boss",
+    "nodes",
+    "custom",
+    "workflow",
+    "customer service",
+    "mollie"
+  ],
     "main": "index.js",
     "scripts": {
         "dev": "npm run watch",
