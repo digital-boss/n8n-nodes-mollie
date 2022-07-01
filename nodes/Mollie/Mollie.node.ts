@@ -413,10 +413,6 @@ export class Mollie implements INodeType {
 					responseData = { success: true };
 				}
 
-				if (responseData?.name === 'Error') {
-					throw new NodeApiError(this.getNode(), responseData);
-				}
-
 				if (operation.startsWith('list')) {
 					switch (resource) {
 						case 'payments':
@@ -446,10 +442,12 @@ export class Mollie implements INodeType {
 				}
 			} catch (error) {
 				if (this.continueOnFail()) {
-					returnData.push({ error: error.message });
+					returnData.push({
+						error: error.message,
+					});
 					continue;
 				}
-				throw error;
+				throw new NodeApiError(this.getNode(), error);
 			}
 		}
 		return [this.helpers.returnJsonArray(returnData)];

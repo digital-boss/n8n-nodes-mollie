@@ -13,7 +13,7 @@ export const paymentsOperations: INodeProperties[] = [
 				resource: ['payments'],
 			},
 		},
-		default: 'getAll',
+		default: 'list',
 		description: 'The operation to perform.',
 		options: [
 			{

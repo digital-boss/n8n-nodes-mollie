@@ -13,7 +13,7 @@ export const refundsOperations: INodeProperties[] = [
 				resource: ['refunds'],
 			},
 		},
-		default: 'getAll',
+		default: 'list',
 		description: 'The operation to perform.',
 		options: [
 			{
